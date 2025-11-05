@@ -3,23 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Painel administrativo do sistema Bebida em Dia">
   <title>Painel Admin - Bebida em Dia</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
-  
-  <!-- Fonts e Ícones -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
-  <!-- Chart.js para gráficos -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js"></script>
-  
-  <!-- Estilos -->
   <link rel="stylesheet" href="/css/styles.css">
-  
-  <!-- Meta tags de segurança -->
-  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="css/admin-styles.css">
 </head>
 <body data-theme="dark">
   <div class="app-container">
@@ -41,8 +28,7 @@
           <div id="errorMsg" class="text-danger mb-2"></div>
           
           <label for="adminPassword">Senha de Administrador:</label>
-          <input type="password" id="adminPassword" class="form-input" 
-                 placeholder="Digite a senha" autocomplete="current-password">
+          <input type="password" id="adminPassword" class="form-input" placeholder="Digite a senha">
           
           <div class="actions-group">
             <button class="btn full-width" id="loginBtn">
@@ -72,29 +58,17 @@
             <i class="fas fa-tachometer-alt"></i>
             Dashboard
           </div>
-          <div class="nav-tab" data-tab="calendar">
-            <i class="fas fa-calendar-alt"></i>
-            Calendário
-          </div>
           <div class="nav-tab" data-tab="people">
             <i class="fas fa-users"></i>
             Pessoas
           </div>
-          <div class="nav-tab" data-tab="settings">
-            <i class="fas fa-cog"></i>
-            Configurações
-          </div>
-          <div class="nav-tab" data-tab="danger">
-            <i class="fas fa-exclamation-triangle"></i>
-            Zona de Perigo
+          <div class="nav-tab" data-tab="calendar">
+            <i class="fas fa-calendar-alt"></i>
+            Calendário
           </div>
         </div>
         
         <div class="actions-group">
-          <button class="btn btn-outline" id="changeThemeBtn">
-            <i class="fas fa-palette"></i>
-            Tema
-          </button>
           <button class="btn btn-outline" id="logoutBtn">
             <i class="fas fa-sign-out-alt"></i>
             Sair
@@ -114,19 +88,19 @@
           <!-- Estatísticas Resumidas -->
           <div class="stats-grid">
             <div class="stat-card">
-              <div class="stat-value" id="totalPayments">...</div>
+              <div class="stat-value" id="totalPayments">0</div>
               <div class="stat-label">Total de Bebidas</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="totalPeople">...</div>
+              <div class="stat-value" id="totalPeople">0</div>
               <div class="stat-label">Pessoas Cadastradas</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="lastPaymentDate">...</div>
+              <div class="stat-value" id="lastPaymentDate">N/A</div>
               <div class="stat-label">Último Pagamento</div>
             </div>
             <div class="stat-card">
-              <div class="stat-value" id="currentMonth">...</div>
+              <div class="stat-value" id="currentMonth">0</div>
               <div class="stat-label">Bebidas Este Mês</div>
             </div>
           </div>
@@ -134,31 +108,6 @@
           <!-- Gráfico de Estatísticas -->
           <div class="chart-container">
             <canvas id="paymentsChart"></canvas>
-          </div>
-        </div>
-
-        <!-- Calendário -->
-        <div class="panel tab-content hidden" id="calendarTab">
-          <div class="panel-header">
-            <h2 class="panel-title">Calendário de Pagamentos</h2>
-            <i class="fas fa-calendar-alt panel-icon"></i>
-          </div>
-          
-          <div class="calendar-nav">
-            <button class="btn small-btn" id="prevMonthBtn" aria-label="Mês anterior">
-              <i class="fas fa-chevron-left"></i>
-            </button>
-            <h2 id="monthYear">Carregando...</h2>
-            <button class="btn small-btn" id="nextMonthBtn" aria-label="Próximo mês">
-              <i class="fas fa-chevron-right"></i>
-            </button>
-          </div>
-          
-          <div class="calendar-grid" id="calendarGrid">
-            <div class="loading-spinner">
-              <div class="spinner"></div>
-              <span>Carregando calendário...</span>
-            </div>
           </div>
         </div>
 
@@ -171,12 +120,11 @@
           
           <div class="alert-content alert-info">
             <i class="fas fa-info-circle alert-icon"></i>
-            <p>Adicione ou remova pessoas do sistema. Remover uma pessoa também remove todo seu histórico de pagamentos.</p>
+            <p>Adicione ou remova pessoas do sistema.</p>
           </div>
           
           <div class="actions-group">
-            <input type="text" id="newPersonName" class="form-input" 
-                   placeholder="Nome da nova pessoa" maxlength="50">
+            <input type="text" id="newPersonName" class="form-input" placeholder="Nome da nova pessoa" maxlength="50">
             <button class="btn" id="addPersonBtn">
               <i class="fas fa-user-plus"></i>
               Adicionar Pessoa
@@ -185,80 +133,31 @@
           
           <ul class="list" id="peopleList">
             <li class="list-item">
-              <div class="loading-spinner">
-                <div class="spinner"></div>
-                <span>Carregando pessoas...</span>
-              </div>
+              <span>Carregando pessoas...</span>
             </li>
           </ul>
         </div>
 
-        <!-- Configurações -->
-        <div class="panel tab-content hidden" id="settingsTab">
+        <!-- Calendário -->
+        <div class="panel tab-content hidden" id="calendarTab">
           <div class="panel-header">
-            <h2 class="panel-title">Configurações do Sistema</h2>
-            <i class="fas fa-cog panel-icon"></i>
+            <h2 class="panel-title">Calendário de Pagamentos</h2>
+            <i class="fas fa-calendar-alt panel-icon"></i>
           </div>
           
-          <div class="alert-content alert-info">
-            <i class="fas fa-info-circle alert-icon"></i>
-            <p>Configure o comportamento do sistema de rodízio de bebidas.</p>
-          </div>
-          
-          <label for="rotationMode">Modo de Rotação:</label>
-          <select id="rotationMode" class="form-input">
-            <option value="sequential">Sequencial (ordem fixa)</option>
-            <option value="random">Aleatório</option>
-          </select>
-          
-          <div class="actions-group">
-            <button class="btn" id="saveSettingsBtn">
-              <i class="fas fa-save"></i>
-              Salvar Configurações
+          <div class="calendar-nav">
+            <button class="btn small-btn" id="prevMonthBtn">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <h2 id="monthYear">Carregando...</h2>
+            <button class="btn small-btn" id="nextMonthBtn">
+              <i class="fas fa-chevron-right"></i>
             </button>
           </div>
           
-          <!-- Informações do Sistema -->
-          <div class="panel" style="margin-top: 2rem;">
-            <div class="panel-header">
-              <h3 class="panel-title">Informações do Sistema</h3>
-              <i class="fas fa-info panel-icon"></i>
-            </div>
-            <div class="stats-grid">
-              <div class="stat-card">
-                <div class="stat-value" id="systemVersion">2.0.0</div>
-                <div class="stat-label">Versão</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-value" id="systemUptime">...</div>
-                <div class="stat-label">Tempo Online</div>
-              </div>
-            </div>
+          <div class="calendar-grid" id="calendarGrid">
+            <div>Carregando calendário...</div>
           </div>
-        </div>
-
-        <!-- Zona de Perigo -->
-        <div class="panel tab-content hidden danger-zone" id="dangerTab">
-          <div class="panel-header">
-            <h2 class="panel-title">Zona de Perigo</h2>
-            <i class="fas fa-exclamation-triangle panel-icon"></i>
-          </div>
-          
-          <div class="alert-content alert-error">
-            <i class="fas fa-exclamation-triangle alert-icon"></i>
-            <p><strong>Atenção!</strong> As ações nesta seção são irreversíveis e podem causar perda de dados.</p>
-          </div>
-          
-          <h3>Resetar Histórico de Pagamentos</h3>
-          <p style="color: var(--text-secondary); margin-bottom: 1rem;">
-            Remove todos os registros de pagamentos, mantendo apenas as pessoas cadastradas. 
-            Um backup será criado automaticamente.
-          </p>
-          
-          <button class="btn danger full-width" id="resetHistoryBtn">
-            <i class="fas fa-trash-alt"></i>
-            Resetar Todo o Histórico
-          </button>
         </div>
       </main>
     </div>
@@ -268,17 +167,14 @@
       <div class="modal">
         <div class="modal-header">
           <h2 class="modal-title" id="paymentModalTitle">Registrar Pagamento</h2>
-          <button class="close-btn" id="closePaymentModal" aria-label="Fechar modal">
+          <button class="close-btn" onclick="closePaymentModal()">
             <i class="fas fa-times"></i>
           </button>
         </div>
         <div class="modal-content">
-          <p class="modal-desc">Selecione quem pagou nesta data ou marque como não pago.</p>
+          <p>Selecione quem pagou nesta data:</p>
           <div id="paymentPeopleList">
-            <div class="loading-spinner">
-              <div class="spinner"></div>
-              <span>Carregando opções...</span>
-            </div>
+            <div>Carregando opções...</div>
           </div>
           <button class="btn danger full-width" id="clearPaymentBtn">
             <i class="fas fa-times"></i>
@@ -287,35 +183,14 @@
         </div>
       </div>
     </div>
-
-    <!-- Modal de Seleção de Tema -->
-    <div class="modal-backdrop hidden" id="themeModal">
-      <div class="modal">
-        <div class="modal-header">
-          <h2 class="modal-title">Selecionar Tema</h2>
-          <button class="close-btn" id="closeThemeModal" aria-label="Fechar modal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-content">
-          <p class="modal-desc">Escolha um tema para personalizar a aparência do painel administrativo.</p>
-          <div id="themeList" class="theme-selector">
-            <div class="loading-spinner">
-              <div class="spinner"></div>
-              <span>Carregando temas...</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 
   <!-- Scripts -->
-  <script type="module" src="/js/utils.js"></script>
-  <script type="module" src="/js/api.js"></script>
-  <script type="module" src="/js/theme.js"></script>
-  <script type="module" src="/js/modal.js"></script>
-  <script type="module" src="/js/admin.js"></script>
+  <script src="/js/utils.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/theme.js"></script>
+  <script src="/js/modal.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>
 

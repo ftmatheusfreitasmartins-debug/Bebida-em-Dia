@@ -111,8 +111,13 @@ NODE_ENV=production
 ### Estrutura de Arquivos
 
 ```
-bebida-em-dia-melhorado/
-├── public/                 # Arquivos estáticos
+coca/
+├── public/                # Arquivos estáticos
+│   ├── assets/
+│   │   └── coca-logo.png  # Logo
+│   │   └── top1.jpg  # Top 1 ranking
+│   │   └── top2.jpg  # Top 2 ranking
+│   │   └── top3.jpg  # Top 3 ranking
 │   ├── css/
 │   │   └── styles.css     # Estilos principais
 │   ├── js/

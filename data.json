@@ -15,7 +15,11 @@
     "2025-09-08": "Matheus",
     "2025-09-14": "Maria Carolina",
     "2025-09-24": "Matheus",
-    "2025-09-26": "Matheus"
+    "2025-09-30": "Lais Dias",
+    "2025-10-08": "Maria Carolina",
+    "2025-10-18": "Maria Carolina",
+    "2025-10-16": "Lais Dias",
+    "2025-10-26": "Lais Dias"
   },
   "chat": [
     {
@@ -45,6 +49,6 @@
   ],
   "settings": {
     "rotationMode": "sequential",
-    "currentIndex": 1
+    "currentIndex": 2
   }
 }
