@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sistema de gerenciamento de rodízio de bebidas - Bebida em Dia">
+    <meta name="keywords" content="bebida, rodízio, pagamento, gestão, controle">
+    <meta name="author" content="Bebida em Dia Team">
+    <title>Bebida em Dia - Sistema de Rodízio</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+    
+    <!-- Fonts e ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/styles.css">
+    
+    <!-- Meta tags para PWA futuro -->
+    <meta name="theme-color" content="#3B82F6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+</head>
+<body data-theme="dark">
+    <div class="app-container">
+        <!-- Cabeçalho -->
+        <header class="app-header">
+            <div class="header-logo">
+                <i class="fas fa-mug-hot logo-icon"></i>
+                <span class="logo-text">Bebida em Dia</span>
+            </div>
+            <nav class="nav-menu">
+                <div class="nav-item active">
+                    <i class="fas fa-home"></i>
+                    <span>Início</span>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Conteúdo Principal -->
+        <main class="main-content">
+            <!-- Seção de Seleção de Perfil -->
+            <section class="profile-section">
+                <h2 class="section-title">
+                    <i class="fas fa-user-circle"></i>
+                    Selecione seu Perfil
+                </h2>
+                <p class="section-description">Escolha quem está pagando hoje</p>
+                <div id="profilesList" class="profiles-grid">
+                    <!-- Cards de perfis serão inseridos aqui via JavaScript -->
+                    <div class="profile-skeleton"></div>
+                    <div class="profile-skeleton"></div>
+                    <div class="profile-skeleton"></div>
+                    <div class="profile-skeleton"></div>
+                </div>
+            </section>
+
+            <!-- Ações Rápidas -->
+            <section class="quick-actions">
+                <h2 class="section-title">
+                    <i class="fas fa-bolt"></i>
+                    Ações Rápidas
+                </h2>
+                <div class="actions-grid">
+                    <button id="registerDrinkBtn" class="btn btn--primary full-width" disabled aria-label="Registrar minha bebida hoje">
+                        <i class="fas fa-beer"></i>
+                        Registrar minha bebida hoje
+                    </button>
+                    <a href="admin.html" class="btn btn-outline full-width" aria-label="Acessar painel administrativo">
+                        <i class="fas fa-lock"></i>
+                        Painel Administrativo
+                    </a>
+                </div>
+            </section>
+
+            <!-- Estatísticas de Hoje -->
+            <section class="stats-section">
+                <h2 class="section-title">
+                    <i class="fas fa-chart-line"></i>
+                    Estatísticas de Hoje
+                </h2>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-gradient-blue">
+                            <i class="fas fa-calendar-day"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Dia do Ano</p>
+                            <p class="stat-value" id="dayOfYear">...</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-gradient-green">
+                            <i class="fas fa-glass-cheers"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Bebidas Registradas</p>
+                            <p class="stat-value" id="totalDrinks">...</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon bg-gradient-purple">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Próxima Pessoa</p>
+                            <p class="stat-value" id="nextPerson">...</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ranking de Bebidas -->
+            <section class="ranking-section">
+                <h2 class="section-title">
+                    <i class="fas fa-trophy"></i>
+                    Ranking de Bebidas
+                </h2>
+                <div id="rankingList" class="ranking-list">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando ranking...</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Histórico Pessoal -->
+            <section class="history-section">
+                <h2 class="section-title">
+                    <i class="fas fa-history"></i>
+                    Histórico de Bebidas
+                </h2>
+                <button id="viewHistoryBtn" class="btn btn-outline full-width" disabled aria-label="Ver histórico pessoal">
+                    <i class="fas fa-list-ul"></i>
+                    Ver Histórico Pessoal
+                </button>
+            </section>
+
+            <!-- Calendário de Bebidas -->
+            <section class="calendar-section">
+                <h2 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Calendário de Bebidas
+                </h2>
+                <div id="calendarView" class="calendar-container">
+                    <div class="loading-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando calendário...</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Rodapé -->
+        <footer class="app-footer">
+            <p>&copy; 2025 Bebida em Dia. Todos os direitos reservados.</p>
+            <div class="footer-links">
+                <button id="openSettingsModal" aria-label="Abrir configurações">
+                    <i class="fas fa-cog"></i>
+                    Configurações
+                </button>
+                <button id="openHelpModal" aria-label="Abrir ajuda">
+                    <i class="fas fa-question-circle"></i>
+                    Ajuda
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Modal de Seleção de Perfil -->
+    <div id="selectPersonModal" class="modal" role="dialog" aria-labelledby="selectPersonTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="selectPersonTitle">
+                    <i class="fas fa-user-circle"></i>
+                    Selecione seu Perfil
+                </h3>
+                <button class="modal-close" data-close="selectPersonModal" aria-label="Fechar modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="modal-description">Escolha quem está pagando hoje:</p>
+                <div id="modalProfilesList" class="profiles-grid">
+                    <!-- Cards de perfis serão inseridos aqui -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Configurações -->
+    <div id="settingsModal" class="modal" role="dialog" aria-labelledby="settingsTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="settingsTitle">
+                    <i class="fas fa-cog"></i>
+                    Configurações
+                </h3>
+                <button class="modal-close" data-close="settingsModal" aria-label="Fechar modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="settings-group">
+                    <label for="themeSelect" class="form-label">
+                        <i class="fas fa-palette"></i>
+                        Tema
+                    </label>
+                    <select id="themeSelect" class="form-control">
+                        <option value="light">Claro</option>
+                        <option value="dark" selected>Escuro</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Ajuda -->
+    <div id="helpModal" class="modal" role="dialog" aria-labelledby="helpTitle" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="helpTitle">
+                    <i class="fas fa-question-circle"></i>
+                    Ajuda
+                </h3>
+                <button class="modal-close" data-close="helpModal" aria-label="Fechar modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="help-content">
+                    <h4>Como usar o Bebida em Dia?</h4>
+                    <ol>
+                        <li>Selecione seu perfil na lista de pessoas</li>
+                        <li>Clique em "Registrar minha bebida hoje" quando pagar</li>
+                        <li>Acompanhe o ranking e o histórico de pagamentos</li>
+                        <li>Use o painel administrativo para gerenciar pessoas e configurações</li>
+                    </ol>
+                    
+                    <h4>Precisa de ajuda?</h4>
+                    <p>Entre em contato com o administrador do sistema.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Container de Notificações Toast -->
+    <div id="toastContainer" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

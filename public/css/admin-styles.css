@@ -1,0 +1,633 @@
+/* ============================================================================
+   BEBIDA EM DIA - ESTILOS ESPECÍFICOS DO PAINEL ADMINISTRATIVO
+   Autor: Bebida em Dia Team
+   Data: 03/11/2025
+   Versão: 1.0.0
+   ============================================================================ */
+
+/* ---=== CONTAINER ADMINISTRATIVO ===--- */
+
+.admin-content {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---=== NAVEGAÇÃO ADMINISTRATIVA ===--- */
+
+.admin-nav {
+  background: var(--gradient-header);
+  border-bottom: 2px solid rgba(59, 130, 246, 0.3);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg);
+}
+
+.admin-nav .header-logo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.admin-nav .logo-icon {
+  font-size: 2rem;
+  background: linear-gradient(135deg, var(--accent-danger) 0%, #FCA5A5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.5));
+  transition: var(--transition);
+}
+
+.admin-nav .logo-icon:hover {
+  transform: scale(1.15) rotate(-8deg);
+  filter: drop-shadow(0 0 15px rgba(248, 113, 113, 0.8));
+}
+
+.admin-nav .logo-text {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent-danger) 0%, #FCA5A5 50%, #FEE2E2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---=== TABS DE NAVEGAÇÃO ===--- */
+
+.nav-tabs {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.nav-tab {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--border-radius-lg);
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-tab::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.nav-tab:hover::before {
+  transform: translateX(100%);
+}
+
+.nav-tab:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
+.nav-tab.active {
+  background: var(--gradient-btn);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.nav-tab i {
+  font-size: 1.15rem;
+  transition: var(--transition);
+}
+
+.nav-tab:hover i,
+.nav-tab.active i {
+  transform: scale(1.2);
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.6));
+}
+
+/* ---=== CONTEÚDO DE ABAS ===--- */
+
+.tab-content {
+  animation: fadeInUp 0.5s ease;
+}
+
+.tab-content.hidden {
+  display: none;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---=== MODAL DE LOGIN ===--- */
+
+#loginModal {
+  display: flex;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+}
+
+#loginModal .modal {
+  max-width: 450px;
+  animation: modalSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#loginModal .modal-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.5rem;
+  background: var(--gradient-danger);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#loginModal .modal-title i {
+  font-size: 1.75rem;
+  background: var(--gradient-danger);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 12px rgba(248, 113, 113, 0.5));
+}
+
+/* ---=== ALERTAS ADMINISTRATIVOS ===--- */
+
+.alert-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  border-radius: var(--border-radius-lg);
+  margin: 1rem 0;
+  border-left: 4px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.alert-content::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0.03;
+}
+
+.alert-icon {
+  font-size: 1.5rem;
+  min-width: 24px;
+  flex-shrink: 0;
+}
+
+.alert-warning {
+  background: rgba(251, 191, 36, 0.1);
+  border-left-color: var(--accent-warning);
+  color: var(--accent-warning);
+}
+
+.alert-warning .alert-icon {
+  color: var(--accent-warning);
+  filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.4));
+}
+
+.alert-warning p {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.alert-info {
+  background: rgba(59, 130, 246, 0.1);
+  border-left-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+.alert-info .alert-icon {
+  color: var(--accent-primary);
+  filter: drop-shadow(0 0 8px rgba(59, 130, 246, 0.4));
+}
+
+.alert-info p {
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.alert-danger {
+  background: rgba(248, 113, 113, 0.1);
+  border-left-color: var(--accent-danger);
+  color: var(--accent-danger);
+}
+
+.alert-danger .alert-icon {
+  color: var(--accent-danger);
+  filter: drop-shadow(0 0 8px rgba(248, 113, 113, 0.4));
+}
+
+.alert-success {
+  background: rgba(52, 211, 153, 0.1);
+  border-left-color: var(--accent-success);
+  color: var(--accent-success);
+}
+
+.alert-success .alert-icon {
+  color: var(--accent-success);
+  filter: drop-shadow(0 0 8px rgba(52, 211, 153, 0.4));
+}
+
+/* ---=== MENSAGENS DE ERRO ===--- */
+
+.text-danger {
+  color: var(--accent-danger);
+  font-weight: 500;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--border-radius);
+  margin: 0.5rem 0;
+}
+
+.text-danger::before {
+  content: '⚠';
+  font-size: 1.2rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+/* ---=== GRUPOS DE AÇÕES ===--- */
+
+.actions-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.actions-group .btn {
+  width: 100%;
+  justify-content: center;
+}
+
+/* ---=== BOTÕES ESPECÍFICOS DO ADMIN ===--- */
+
+.btn.full-width {
+  width: 100%;
+  justify-content: center;
+  font-size: 1rem;
+  padding: 1rem 1.5rem;
+  min-height: 50px;
+}
+
+.btn.small-btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-height: 38px;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+}
+
+.btn-outline:hover {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+}
+
+/* ---=== GRÁFICO DE ESTATÍSTICAS ===--- */
+
+.chart-container {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  padding: 2rem 1.5rem;
+  margin: 2rem 0;
+  min-height: 350px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.chart-container canvas {
+  max-height: 300px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ---=== LISTA DE PESSOAS NO ADMIN ===--- */
+
+#peopleList .list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.75rem;
+  background: linear-gradient(135deg, var(--panel) 0%, rgba(59, 130, 246, 0.03) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 0.75rem;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+#peopleList .list-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--gradient-btn);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.4s ease;
+}
+
+#peopleList .list-item:hover::before {
+  transform: scaleY(1);
+  transform-origin: top;
+}
+
+#peopleList .list-item:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.12) 0%, rgba(59, 130, 246, 0.06) 100%);
+  border-color: var(--accent-primary);
+  transform: translateX(8px) scale(1.02);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+}
+
+#peopleList .list-item span {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+#peopleList .list-item span::before {
+  content: '👤';
+  font-size: 1.25rem;
+}
+
+#peopleList .list-item button {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--accent-danger);
+  padding: 0.5rem 1rem;
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#peopleList .list-item button:hover {
+  background: var(--gradient-danger);
+  color: var(--text-primary);
+  border-color: var(--accent-danger);
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4);
+}
+
+/* ---=== MODAL DE PAGAMENTO ===--- */
+
+#paymentModal .modal {
+  max-width: 500px;
+}
+
+#paymentPeopleList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+}
+
+#paymentPeopleList .person-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.03) 100%);
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--border-radius-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+#paymentPeopleList .person-option::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+#paymentPeopleList .person-option:hover::before {
+  transform: translateX(100%);
+}
+
+#paymentPeopleList .person-option:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border-color: var(--accent-primary);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.3);
+}
+
+#paymentPeopleList .person-option.selected {
+  background: var(--gradient-btn);
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+#paymentPeopleList .person-option input[type="radio"] {
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  accent-color: var(--accent-primary);
+}
+
+#paymentPeopleList .person-option label {
+  font-family: 'Poppins', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex: 1;
+}
+
+/* ---=== RESPONSIVIDADE ADMIN ===--- */
+
+@media (max-width: 1024px) {
+  .admin-nav {
+    padding: 1.25rem 1.5rem;
+  }
+
+  .nav-tabs {
+    gap: 0.75rem;
+  }
+
+  .nav-tab {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-nav {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.25rem 1rem;
+  }
+
+  .nav-tabs {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .nav-tab {
+    flex: 1;
+    min-width: 140px;
+    justify-content: center;
+  }
+
+  .actions-group {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    padding: 1.5rem 1rem;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-nav {
+    padding: 1rem;
+  }
+
+  .admin-nav .logo-icon {
+    font-size: 1.5rem;
+  }
+
+  .admin-nav .logo-text {
+    font-size: 1.25rem;
+  }
+
+  .nav-tabs {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-tab {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  #peopleList .list-item {
+    padding: 1rem 1.25rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  #peopleList .list-item button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #paymentPeopleList .person-option {
+    padding: 1rem 1.25rem;
+  }
+}
+
+/* ---=== UTILITÁRIOS ESPECÍFICOS ===--- */
+
+.close-btn {
+  background: rgba(248, 113, 113, 0.1);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--accent-danger);
+  width: 40px;
+  height: 40px;
+  border-radius: var(--border-radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 1.1rem;
+}
+
+.close-btn:hover {
+  background: var(--gradient-danger);
+  color: var(--text-primary);
+  border-color: var(--accent-danger);
+  transform: rotate(90deg) scale(1.1);
+  box-shadow: 0 4px 12px rgba(248, 113, 113, 0.4);
+}
