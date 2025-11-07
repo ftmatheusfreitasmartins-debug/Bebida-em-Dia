@@ -151,6 +151,17 @@ app.post('/api/admin/login', (req, res) => {
     }
 });
 
+// GET /api/admin/data
+app.get('/api/admin/data', (req, res) => {
+    try {
+        const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        res.json(data);
+    } catch (error) {
+        res.status(500).json({ error: 'Erro ao obter dados' });
+    }
+});
+
+
 // POST /api/admin/people
 app.post('/api/admin/people', (req, res) => {
     try {
