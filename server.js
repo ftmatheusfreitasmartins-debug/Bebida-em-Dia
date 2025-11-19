@@ -372,6 +372,37 @@ app.get('/api/data', (req, res) => {
     }
 });
 
+// GET /api/next-person - Obter próxima pessoa a pagar (pessoa com menos pagamentos)
+app.get('/api/next-person', (req, res) => {
+    try {
+        const data = readData();
+        const people = data.people || [];
+        
+        if (people.length === 0) {
+            return res.json({ nextPerson: null });
+        }
+        
+        const paidDates = data.paidDates || {};
+        
+        // Contar pagamentos de cada pessoa
+        const counts = {};
+        people.forEach(person => {
+            counts[person] = Object.values(paidDates).filter(p => p === person).length;
+        });
+        
+        // Encontrar pessoa com menos pagamentos
+        const nextPerson = people.reduce((prev, curr) => {
+            return counts[curr] < counts[prev] ? curr : prev;
+        });
+        
+        console.log('📊 Próxima pessoa calculada:', nextPerson, 'Contagem:', counts);
+        res.json({ nextPerson });
+    } catch (error) {
+        console.error('❌ Erro ao obter próxima pessoa:', error);
+        res.status(500).json({ error: 'Erro ao obter próxima pessoa' });
+    }
+});
+
 // GET /api/health - Status de saúde
 app.get('/api/health', (req, res) => {
     res.json({
