@@ -372,7 +372,7 @@ app.get('/api/data', (req, res) => {
     }
 });
 
-// GET /api/next-person - Obter próxima pessoa a pagar (pessoa com menos pagamentos)
+// GET /api/next-person - Obter próxima pessoa a pagar
 app.get('/api/next-person', (req, res) => {
     try {
         const data = readData();
@@ -598,6 +598,113 @@ app.post('/api/admin/backup/restore', async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 });
+
+// ========== AUTO-COMMIT MANAGER ==========
+class AutoCommitManager {
+    constructor() {
+        this.lastHash = null;
+        this.isCommitting = false;
+        this.watchInterval = null;
+        this.init();
+    }
+
+    init() {
+        console.log('📡 AutoCommitManager inicializado');
+        this.startWatching();
+    }
+
+    startWatching() {
+        console.log('👀 Observando mudanças em data.json...');
+        
+        this.watchInterval = setInterval(() => {
+            this.checkForChanges();
+        }, 5000);
+    }
+
+    getFileHash() {
+        try {
+            if (!fs.existsSync(DATA_FILE)) {
+                return null;
+            }
+            const content = fs.readFileSync(DATA_FILE, 'utf8');
+            const crypto = require('crypto');
+            return crypto.createHash('md5').update(content).digest('hex');
+        } catch (error) {
+            console.error('Erro ao calcular hash:', error);
+            return null;
+        }
+    }
+
+    async checkForChanges() {
+        const currentHash = this.getFileHash();
+        
+        if (currentHash && this.lastHash && currentHash !== this.lastHash) {
+            console.log('\n🔄 Mudanças detectadas em data.json!');
+            await this.commitAndPush();
+        }
+        
+        this.lastHash = currentHash;
+    }
+
+    async commitAndPush() {
+        if (this.isCommitting) {
+            console.log('⏳ Já está fazendo commit...');
+            return;
+        }
+
+        this.isCommitting = true;
+
+        try {
+            console.log('💾 Fazendo commit automático...');
+
+            try {
+                execSync('git config user.email', { encoding: 'utf8' });
+            } catch {
+                console.log('⚙️ Configurando Git...');
+                execSync('git config user.email "bot@bebida-em-dia.local"');
+                execSync('git config user.name "Bebida em Dia Auto-Commit Bot"');
+            }
+
+            execSync('git add data.json');
+            console.log('✅ Arquivo adicionado');
+
+            try {
+                const status = execSync('git status --porcelain', { encoding: 'utf8' });
+                if (!status.trim()) {
+                    console.log('ℹ️ Nenhuma mudança para commitar');
+                    return;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar status:', error);
+                return;
+            }
+
+            const timestamp = new Date().toLocaleString('pt-BR');
+            const commitMsg = `auto: atualizar data.json - ${timestamp}`;
+            execSync(`git commit -m "${commitMsg}"`);
+            console.log('✅ Commit realizado');
+
+            console.log('🚀 Fazendo push para GitHub...');
+            execSync('git push origin main');
+            console.log('✅ Push realizado com sucesso!');
+            console.log('🎉 data.json sincronizado com GitHub!\n');
+
+        } catch (error) {
+            console.error('❌ Erro ao fazer auto-commit:', error.message);
+        } finally {
+            this.isCommitting = false;
+        }
+    }
+
+    stop() {
+        if (this.watchInterval) {
+            clearInterval(this.watchInterval);
+        }
+    }
+}
+
+// Inicializar
+const autoCommit = new AutoCommitManager();
 
 // ========== INICIAR SERVIDOR ==========
 server.listen(PORT, () => {
