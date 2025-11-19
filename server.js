@@ -1,6 +1,5 @@
-// --- Auto-Sync com GitHub API - server.js v3.1 ---
+// --- Auto-Sync com GitHub API v3.2 - COM TRATAMENTO DE ERRO 401 ---
 // ✅ Sincroniza data.json automaticamente para GitHub (RENDER-FRIENDLY)
-// Usa GitHub API em vez de Git CLI
 
 const express = require('express');
 const cors = require('cors');
@@ -30,7 +29,9 @@ const GITHUB_CONFIG = {
     owner: 'ftmatheusfreitasmartins-debug',
     repo: 'Bebida-em-Dia',
     branch: 'main',
-    token: process.env.GITHUB_TOKEN || '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',
+    // ⚠️ IMPORTANTE: Use a variável de ambiente EM PRIMEIRO LUGAR
+    // Se não tiver, usa token padrão (será rejeitado e informará para atualizar)
+    token: process.env.GITHUB_TOKEN || '',
     filePath: 'data.json'
 };
 
@@ -40,13 +41,23 @@ class AutoSyncManager {
         this.lastHash = null;
         this.isSyncing = false;
         this.watchInterval = null;
+        this.tokenInvalid = false;
         this.init();
     }
 
     init() {
-        console.log('📡 AutoSyncManager inicializado (GitHub API)');
+        console.log('📡 AutoSyncManager inicializado (GitHub API v3.2)');
         console.log(`   GitHub Owner: ${GITHUB_CONFIG.owner}`);
         console.log(`   Repository: ${GITHUB_CONFIG.repo}`);
+        
+        if (!GITHUB_CONFIG.token) {
+            console.warn('\n⚠️  AVISO: Token do GitHub não configurado!');
+            console.warn('   Adicione em .env: GITHUB_TOKEN=seu_token_aqui');
+            this.tokenInvalid = true;
+        } else {
+            console.log(`   Token: ${GITHUB_CONFIG.token.substring(0, 10)}...`);
+        }
+        
         this.startWatching();
     }
 
@@ -90,6 +101,12 @@ class AutoSyncManager {
             return;
         }
 
+        // Se token é inválido, não tenta sincronizar
+        if (this.tokenInvalid) {
+            console.log('⏭️  Pulando sincronização (token inválido)');
+            return;
+        }
+
         this.isSyncing = true;
 
         try {
@@ -126,6 +143,19 @@ class AutoSyncManager {
 
         } catch (error) {
             console.error('❌ Erro ao sincronizar:', error.message);
+            
+            // Se for erro 401, marca como inválido
+            if (error.statusCode === 401) {
+                console.warn('\n🚨 ERRO 401: Token inválido ou expirado!');
+                console.warn('   Ações necessárias:');
+                console.warn('   1. Gere um novo token: https://github.com/settings/tokens');
+                console.warn('   2. Selecione "Generate new token (classic)"');
+                console.warn('   3. Marque permissão "repo" (full control)');
+                console.warn('   4. Copie o token gerado');
+                console.warn('   5. Adicione em .env: GITHUB_TOKEN=seu_novo_token');
+                console.warn('   6. Reinicie o servidor\n');
+                this.tokenInvalid = true;
+            }
         } finally {
             this.isSyncing = false;
         }
@@ -156,6 +186,10 @@ class AutoSyncManager {
                         if (res.statusCode === 200) {
                             const parsed = JSON.parse(data);
                             resolve(parsed.sha);
+                        } else if (res.statusCode === 401) {
+                            const error = new Error('Token inválido');
+                            error.statusCode = 401;
+                            reject(error);
                         } else {
                             reject(new Error(`Status ${res.statusCode}`));
                         }
@@ -164,6 +198,11 @@ class AutoSyncManager {
             });
         } catch (error) {
             console.error('❌ Erro ao obter SHA:', error.message);
+            if (error.statusCode === 401) {
+                const err = new Error(error.message);
+                err.statusCode = 401;
+                throw err;
+            }
             return null;
         }
     }
@@ -195,6 +234,11 @@ class AutoSyncManager {
                 res.on('end', () => {
                     if (res.statusCode >= 200 && res.statusCode < 300) {
                         resolve(JSON.parse(data));
+                    } else if (res.statusCode === 401) {
+                        const error = new Error('Token inválido (401)');
+                        error.statusCode = 401;
+                        error.statusMessage = data;
+                        reject(error);
                     } else {
                         reject(new Error(`Status ${res.statusCode}: ${data}`));
                     }
@@ -287,8 +331,9 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        version: '3.1',
+        version: '3.2',
         autoSyncEnabled: true,
+        tokenValid: !autoSync.tokenInvalid,
         platform: 'Render'
     });
 });
@@ -426,7 +471,7 @@ const server = require('http').createServer(app);
 server.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════════════════╗
-║  🍹 Bebida em Dia - Backend v3.1 - RENDER READY                    ║
+║  🍹 Bebida em Dia - Backend v3.2 - RENDER READY                    ║
 ║  ✅ HTTP Server rodando em http://localhost:${PORT}                
 ║  📡 Auto-Sync: ATIVADO ✓ (GitHub API)                              ║
 ║  💾 Sincronização automática de data.json a cada 10 segundos!      ║
