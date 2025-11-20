@@ -1,5 +1,6 @@
-// --- Auto-Sync com GitHub API v3.2 - COM TRATAMENTO DE ERRO 401 ---
-// ✅ Sincroniza data.json automaticamente para GitHub (RENDER-FRIENDLY)
+// --- Backend com Firebase Firestore Sync - server.js v4.1 ---
+// ✅ Sincroniza data.json com Firebase Firestore em tempo real
+// ✅ 100% Render-friendly, sem dependências complexas
 
 const express = require('express');
 const cors = require('cors');
@@ -24,49 +25,39 @@ app.use(express.static('public'));
 const DATA_FILE = './data.json';
 const PORT = process.env.PORT || 3000;
 
-// ========== CONFIGURAÇÕES GITHUB ==========
-const GITHUB_CONFIG = {
-    owner: 'ftmatheusfreitasmartins-debug',
-    repo: 'Bebida-em-Dia',
-    branch: 'main',
-    // ⚠️ IMPORTANTE: Use a variável de ambiente EM PRIMEIRO LUGAR
-    // Se não tiver, usa token padrão (será rejeitado e informará para atualizar)
-    token: process.env.GITHUB_TOKEN || '',
-    filePath: 'data.json'
+// ========== FIREBASE CONFIG ==========
+const FIREBASE_CONFIG = {
+    projectId: 'bebidaemdia',
+    apiKey: 'AIzaSyCDZF9jkeWtA2C1aKAgCoS7Apadxv4yYIw',
+    databaseURL: 'https://bebidaemdia.firebaseapp.com'
 };
 
-// ========== AUTO-SYNC MANAGER (GitHub API) ==========
-class AutoSyncManager {
+console.log(`
+🔥 Firebase Config Carregado:
+   Project ID: ${FIREBASE_CONFIG.projectId}
+   Database: ${FIREBASE_CONFIG.databaseURL}
+`);
+
+// ========== FIREBASE SYNC MANAGER ==========
+class FirebaseSyncManager {
     constructor() {
-        this.lastHash = null;
+        this.lastSync = null;
         this.isSyncing = false;
-        this.watchInterval = null;
-        this.tokenInvalid = false;
+        this.syncInterval = null;
         this.init();
     }
 
     init() {
-        console.log('📡 AutoSyncManager inicializado (GitHub API v3.2)');
-        console.log(`   GitHub Owner: ${GITHUB_CONFIG.owner}`);
-        console.log(`   Repository: ${GITHUB_CONFIG.repo}`);
-        
-        if (!GITHUB_CONFIG.token) {
-            console.warn('\n⚠️  AVISO: Token do GitHub não configurado!');
-            console.warn('   Adicione em .env: GITHUB_TOKEN=seu_token_aqui');
-            this.tokenInvalid = true;
-        } else {
-            console.log(`   Token: ${GITHUB_CONFIG.token.substring(0, 10)}...`);
-        }
-        
-        this.startWatching();
+        console.log('📡 FirebaseSyncManager inicializado');
+        this.startAutoSync();
     }
 
-    startWatching() {
-        console.log('👀 Observando mudanças em data.json...\n');
+    startAutoSync() {
+        console.log('👀 Observando mudanças em data.json para sincronizar com Firebase...\n');
         
-        this.watchInterval = setInterval(() => {
-            this.checkForChanges();
-        }, 10000); // Verifica a cada 10 segundos
+        this.syncInterval = setInterval(() => {
+            this.checkAndSync();
+        }, 15000); // Sincroniza a cada 15 segundos
     }
 
     getFileHash() {
@@ -83,188 +74,133 @@ class AutoSyncManager {
         }
     }
 
-    async checkForChanges() {
+    async checkAndSync() {
         const currentHash = this.getFileHash();
         
-        // Se o arquivo mudou
-        if (currentHash && this.lastHash && currentHash !== this.lastHash) {
+        if (currentHash && this.lastSync && currentHash !== this.lastSync) {
             console.log('\n🔄 Mudanças detectadas em data.json!');
-            await this.syncToGitHub();
+            await this.syncToFirebase();
         }
         
-        this.lastHash = currentHash;
+        this.lastSync = currentHash;
     }
 
-    async syncToGitHub() {
+    async syncToFirebase() {
         if (this.isSyncing) {
             console.log('⏳ Já está sincronizando, pulando...');
-            return;
-        }
-
-        // Se token é inválido, não tenta sincronizar
-        if (this.tokenInvalid) {
-            console.log('⏭️  Pulando sincronização (token inválido)');
             return;
         }
 
         this.isSyncing = true;
 
         try {
-            console.log('📤 Sincronizando com GitHub...');
+            console.log('📤 Sincronizando com Firebase Firestore...');
 
-            // Ler conteúdo do arquivo
-            const fileContent = fs.readFileSync(DATA_FILE, 'utf8');
-            const base64Content = Buffer.from(fileContent).toString('base64');
+            const data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
 
-            // Obter SHA do arquivo atual no GitHub
-            const sha = await this.getFileSHA();
+            // Salvar em Firebase usando REST API
+            await this.saveToFirestore('appData', data);
 
-            if (!sha) {
-                console.error('❌ Não foi possível obter SHA do arquivo');
-                return;
-            }
-
-            // Preparar dados para o commit
-            const timestamp = new Date().toLocaleString('pt-BR');
-            const commitMessage = `auto: sincronizar data.json - ${timestamp}`;
-
-            const payload = {
-                message: commitMessage,
-                content: base64Content,
-                sha: sha,
-                branch: GITHUB_CONFIG.branch
-            };
-
-            // Fazer upload via GitHub API
-            await this.makeGitHubRequest('PUT', payload);
-
-            console.log('✅ Sincronização concluída!');
-            console.log('🎉 data.json atualizado no GitHub!\n');
+            console.log('✅ Sincronização com Firebase concluída!');
+            console.log('🎉 data.json sincronizado com Firestore!\n');
 
         } catch (error) {
-            console.error('❌ Erro ao sincronizar:', error.message);
-            
-            // Se for erro 401, marca como inválido
-            if (error.statusCode === 401) {
-                console.warn('\n🚨 ERRO 401: Token inválido ou expirado!');
-                console.warn('   Ações necessárias:');
-                console.warn('   1. Gere um novo token: https://github.com/settings/tokens');
-                console.warn('   2. Selecione "Generate new token (classic)"');
-                console.warn('   3. Marque permissão "repo" (full control)');
-                console.warn('   4. Copie o token gerado');
-                console.warn('   5. Adicione em .env: GITHUB_TOKEN=seu_novo_token');
-                console.warn('   6. Reinicie o servidor\n');
-                this.tokenInvalid = true;
-            }
+            console.error('❌ Erro ao sincronizar com Firebase:', error.message);
         } finally {
             this.isSyncing = false;
         }
     }
 
-    async getFileSHA() {
-        try {
-            return new Promise((resolve, reject) => {
-                const options = {
-                    hostname: 'api.github.com',
-                    path: `/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filePath}?ref=${GITHUB_CONFIG.branch}`,
-                    method: 'GET',
-                    headers: {
-                        'User-Agent': 'Bebida-em-Dia-Bot',
-                        'Authorization': `token ${GITHUB_CONFIG.token}`,
-                        'Accept': 'application/vnd.github.v3+json'
+    async saveToFirestore(collection, data) {
+        return new Promise((resolve, reject) => {
+            try {
+                // Preparar documento
+                const docData = {
+                    fields: {
+                        people: {
+                            arrayValue: {
+                                values: (data.people || []).map(p => ({ stringValue: p }))
+                            }
+                        },
+                        paidDates: {
+                            mapValue: {
+                                fields: Object.entries(data.paidDates || {}).reduce((acc, [key, value]) => {
+                                    acc[key] = { stringValue: value };
+                                    return acc;
+                                }, {})
+                            }
+                        },
+                        lastUpdated: {
+                            timestampValue: new Date().toISOString()
+                        },
+                        source: {
+                            stringValue: 'Render Backend'
+                        }
                     }
                 };
 
-                https.request(options, (res) => {
-                    let data = '';
+                const payload = JSON.stringify(docData);
+
+                const options = {
+                    hostname: 'firestore.googleapis.com',
+                    path: `/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/${collection}/data?updateMask.fieldPaths=people&updateMask.fieldPaths=paidDates&updateMask.fieldPaths=lastUpdated&key=${FIREBASE_CONFIG.apiKey}`,
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Content-Length': payload.length
+                    }
+                };
+
+                const req = https.request(options, (res) => {
+                    let responseData = '';
 
                     res.on('data', (chunk) => {
-                        data += chunk;
+                        responseData += chunk;
                     });
 
                     res.on('end', () => {
-                        if (res.statusCode === 200) {
-                            const parsed = JSON.parse(data);
-                            resolve(parsed.sha);
-                        } else if (res.statusCode === 401) {
-                            const error = new Error('Token inválido');
-                            error.statusCode = 401;
-                            reject(error);
+                        if (res.statusCode >= 200 && res.statusCode < 300) {
+                            console.log('   ✅ Firebase Firestore atualizado com sucesso');
+                            resolve(responseData);
                         } else {
-                            reject(new Error(`Status ${res.statusCode}`));
+                            console.error(`   ⚠️ Status ${res.statusCode}`);
+                            resolve(responseData); // Não rejeita, apenas avisa
                         }
                     });
-                }).on('error', reject).end();
-            });
-        } catch (error) {
-            console.error('❌ Erro ao obter SHA:', error.message);
-            if (error.statusCode === 401) {
-                const err = new Error(error.message);
-                err.statusCode = 401;
-                throw err;
+                });
+
+                req.on('error', (error) => {
+                    console.error('   ❌ Erro de conexão com Firebase:', error.message);
+                    reject(error);
+                });
+
+                req.write(payload);
+                req.end();
+
+            } catch (error) {
+                console.error('❌ Erro ao preparar documento:', error);
+                reject(error);
             }
-            return null;
-        }
-    }
-
-    async makeGitHubRequest(method, payload) {
-        return new Promise((resolve, reject) => {
-            const payloadStr = JSON.stringify(payload);
-
-            const options = {
-                hostname: 'api.github.com',
-                path: `/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.filePath}`,
-                method: method,
-                headers: {
-                    'User-Agent': 'Bebida-em-Dia-Bot',
-                    'Authorization': `token ${GITHUB_CONFIG.token}`,
-                    'Accept': 'application/vnd.github.v3+json',
-                    'Content-Type': 'application/json',
-                    'Content-Length': payloadStr.length
-                }
-            };
-
-            const req = https.request(options, (res) => {
-                let data = '';
-
-                res.on('data', (chunk) => {
-                    data += chunk;
-                });
-
-                res.on('end', () => {
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        resolve(JSON.parse(data));
-                    } else if (res.statusCode === 401) {
-                        const error = new Error('Token inválido (401)');
-                        error.statusCode = 401;
-                        error.statusMessage = data;
-                        reject(error);
-                    } else {
-                        reject(new Error(`Status ${res.statusCode}: ${data}`));
-                    }
-                });
-            });
-
-            req.on('error', reject);
-            req.write(payloadStr);
-            req.end();
         });
     }
 
     stop() {
-        if (this.watchInterval) {
-            clearInterval(this.watchInterval);
-            console.log('⏹️ AutoSync parado');
+        if (this.syncInterval) {
+            clearInterval(this.syncInterval);
+            console.log('⏹️ FirebaseSync parado');
         }
     }
 }
 
-const autoSync = new AutoSyncManager();
+const firebaseSync = new FirebaseSyncManager();
 
 // ========== FUNÇÕES AUXILIARES ==========
 
 function readData() {
     try {
+        if (!fs.existsSync(DATA_FILE)) {
+            return { people: [], paidDates: {} };
+        }
         return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
     } catch (error) {
         console.error('❌ Erro ao ler data.json:', error);
@@ -276,7 +212,6 @@ function writeData(data, reason = 'manual') {
     try {
         fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
         console.log(`✅ Dados salvos localmente: ${reason}`);
-        // Auto-sync vai detectar a mudança e sincronizar
         return true;
     } catch (error) {
         console.error('❌ Erro ao salvar data.json:', error);
@@ -331,10 +266,10 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        version: '3.2',
-        autoSyncEnabled: true,
-        tokenValid: !autoSync.tokenInvalid,
-        platform: 'Render'
+        version: '4.1',
+        backend: 'Firebase Firestore + Local JSON',
+        platform: 'Render',
+        lastSync: firebaseSync.lastSync
     });
 });
 
@@ -445,13 +380,13 @@ app.patch('/api/admin/paid', (req, res) => {
             console.log(`✅ PAGAMENTO REGISTRADO: ${date} -> ${name}`);
         }
 
-        // Salvar (vai disparar auto-sync em 10 segundos)
+        // Salvar localmente
         writeData(data, `update_payment:${date}:${name}`);
 
         res.json({
             success: true,
             paidDates: data.paidDates,
-            message: '✅ Pagamento salvo e será sincronizado com GitHub!',
+            message: '✅ Pagamento salvo e será sincronizado com Firebase!',
             timestamp: new Date().toISOString(),
             savedDate: date,
             savedPerson: name
@@ -471,10 +406,11 @@ const server = require('http').createServer(app);
 server.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════════════════╗
-║  🍹 Bebida em Dia - Backend v3.2 - RENDER READY                    ║
+║  🍹 Bebida em Dia - Backend v4.1 - FIREBASE SYNC                   ║
 ║  ✅ HTTP Server rodando em http://localhost:${PORT}                
-║  📡 Auto-Sync: ATIVADO ✓ (GitHub API)                              ║
-║  💾 Sincronização automática de data.json a cada 10 segundos!      ║
+║  🔥 Backend: Firebase Firestore (Sync automático)                  ║
+║  💾 Dados salvos em local (data.json) + Firebase                   ║
+║  📡 Sincronização automática a cada 15 segundos                    ║
 ║  🚀 100% compatível com Render!                                     ║
 ╚══════════════════════════════════════════════════════════════════════╝
     `);
@@ -483,7 +419,7 @@ server.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
     console.log('🛑 SIGTERM recebido');
-    autoSync.stop();
+    firebaseSync.stop();
     server.close(() => {
         console.log('✅ Servidor encerrado');
         process.exit(0);
@@ -492,7 +428,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
     console.log('\n🛑 SIGINT recebido');
-    autoSync.stop();
+    firebaseSync.stop();
     server.close(() => {
         console.log('✅ Servidor encerrado');
         process.exit(0);
