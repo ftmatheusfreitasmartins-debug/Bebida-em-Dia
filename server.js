@@ -1,6 +1,6 @@
-// --- Backend com Firebase Firestore Sync - server.js v4.1 ---
+// --- Backend com Firebase Firestore Sync - server.js v4.2 ---
+// ✅ CORS CORRIGIDO para funcionar com Firebase
 // ✅ Sincroniza data.json com Firebase Firestore em tempo real
-// ✅ 100% Render-friendly, sem dependências complexas
 
 const express = require('express');
 const cors = require('cors');
@@ -10,7 +10,21 @@ require('dotenv').config();
 
 const app = express();
 
-// ========== CONFIGURAÇÃO CORS ==========
+// ========== CONFIGURAÇÃO CORS ROBUSTA (FIX) ==========
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Max-Age', '3600');
+    
+    // Responder a preflight requests
+    if (req.method === 'OPTIONS') {
+        return res.sendStatus(200);
+    }
+    
+    next();
+});
+
 app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
@@ -266,10 +280,11 @@ app.get('/api/health', (req, res) => {
     res.json({
         status: 'ok',
         timestamp: new Date().toISOString(),
-        version: '4.1',
+        version: '4.2',
         backend: 'Firebase Firestore + Local JSON',
         platform: 'Render',
-        lastSync: firebaseSync.lastSync
+        lastSync: firebaseSync.lastSync,
+        corsEnabled: true
     });
 });
 
@@ -406,12 +421,12 @@ const server = require('http').createServer(app);
 server.listen(PORT, () => {
     console.log(`
 ╔══════════════════════════════════════════════════════════════════════╗
-║  🍹 Bebida em Dia - Backend v4.1 - FIREBASE SYNC                   ║
+║  🍹 Bebida em Dia - Backend v4.2 - FIREBASE SYNC (CORS FIXED)      ║
 ║  ✅ HTTP Server rodando em http://localhost:${PORT}                
 ║  🔥 Backend: Firebase Firestore (Sync automático)                  ║
 ║  💾 Dados salvos em local (data.json) + Firebase                   ║
 ║  📡 Sincronização automática a cada 15 segundos                    ║
-║  🚀 100% compatível com Render!                                     ║
+║  🚀 CORS Ativado - Funciona com Firebase Hosting!                  ║
 ╚══════════════════════════════════════════════════════════════════════╝
     `);
 });
