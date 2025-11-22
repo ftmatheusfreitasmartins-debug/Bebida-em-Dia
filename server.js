@@ -11,7 +11,7 @@ const FirebaseManager = require('./firebase-manager');
 // ========== CONFIGURAÇÃO EXPRESS ==========
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FIREBASE_URL = process.env.FIREBASE_URL || 'https://bebi-em-dia.firebaseio.com';
+const FIREBASE_URL = process.env.FIREBASE_URL || 'https://bebidaemdia-default-rtdb.firebaseio.com/';
 
 // Middleware
 app.use(cors({
