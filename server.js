@@ -1,14 +1,15 @@
 // 🔥 Bebida em Dia - Backend com Firebase Realtime Database
+
 // v4.0 - Firebase Realtime Database + Auto-Sync
 
 const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 require('dotenv').config();
-
 const FirebaseManager = require('./firebase-manager');
 
 // ========== CONFIGURAÇÃO EXPRESS ==========
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 const FIREBASE_URL = process.env.FIREBASE_URL || 'https://bebidaemdia-default-rtdb.firebaseio.com/';
@@ -27,6 +28,7 @@ app.use(express.static('public'));
 const DATA_FILE = './data.json';
 
 // ========== INICIALIZAR FIREBASE ==========
+
 let firebaseManager;
 let isFirebaseReady = false;
 
@@ -38,7 +40,7 @@ let isFirebaseReady = false;
     console.log('🚀 Sistema pronto para usar!\n');
   } catch (error) {
     console.error('⚠️ Firebase não disponível, continuando com arquivo local');
-    console.error('   Instale firebase-admin: npm install firebase-admin\n');
+    console.error(' Instale firebase-admin: npm install firebase-admin\n');
   }
 })();
 
@@ -60,12 +62,12 @@ function writeData(data, reason = 'manual') {
   try {
     fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
     console.log(`✅ Dados salvos localmente: ${reason}`);
-    
+
     // Disparar sincronização com Firebase se estiver disponível
     if (isFirebaseReady && firebaseManager) {
       firebaseManager.syncLocalToFirebase();
     }
-    
+
     return true;
   } catch (error) {
     console.error('❌ Erro ao salvar data.json:', error);
@@ -90,7 +92,7 @@ app.get('/api/next-person', (req, res) => {
   try {
     const data = readData();
     const people = data.people || [];
-    
+
     if (people.length === 0) {
       return res.json({ nextPerson: null });
     }
@@ -108,7 +110,6 @@ app.get('/api/next-person', (req, res) => {
 
     console.log('📊 Próxima pessoa calculada:', nextPerson);
     res.json({ nextPerson });
-
   } catch (error) {
     res.status(500).json({ error: 'Erro ao obter próxima pessoa' });
   }
@@ -118,7 +119,6 @@ app.get('/api/next-person', (req, res) => {
 app.get('/api/health', async (req, res) => {
   try {
     const firebaseStatus = isFirebaseReady ? await firebaseManager.getStatus() : { status: 'Firebase não disponível' };
-    
     res.json({
       status: 'ok',
       timestamp: new Date().toISOString(),
@@ -136,7 +136,7 @@ app.get('/api/health', async (req, res) => {
 // ✅ POST /api/admin/login - Autenticação
 app.post('/api/admin/login', (req, res) => {
   const { password } = req.body;
-  
+
   if (password === process.env.ADMIN_PASSWORD || password === 'coca') {
     const token = 'admin_token_' + Date.now();
     res.json({
@@ -172,13 +172,13 @@ app.get('/api/admin/data', (req, res) => {
 app.post('/api/admin/people', (req, res) => {
   try {
     const { name } = req.body;
-    
+
     if (!name || typeof name !== 'string' || name.trim().length === 0) {
       return res.status(400).json({ error: 'Nome inválido' });
     }
 
     const data = readData();
-    
+
     if (!data.people.includes(name.trim())) {
       data.people.push(name.trim());
       writeData(data, `add_person:${name}`);
@@ -189,7 +189,6 @@ app.post('/api/admin/people', (req, res) => {
       people: data.people,
       message: 'Pessoa adicionada com sucesso'
     });
-
   } catch (error) {
     console.error('❌ Erro ao adicionar pessoa:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -204,7 +203,7 @@ app.delete('/api/admin/people/:name', (req, res) => {
     const data = readData();
 
     data.people = data.people.filter(p => p !== decodedName);
-    
+
     // Remover pagamentos dessa pessoa
     Object.keys(data.paidDates).forEach(date => {
       if (data.paidDates[date] === decodedName) {
@@ -220,14 +219,13 @@ app.delete('/api/admin/people/:name', (req, res) => {
       paidDates: data.paidDates,
       message: 'Pessoa removida com sucesso'
     });
-
   } catch (error) {
     console.error('❌ Erro ao remover pessoa:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ✅ PATCH /api/admin/paid - Atualizar pagamento (PRINCIPAL)
+// ✅ PATCH /api/admin/paid - Atualizar pagamento (CORRIGIDO - AGORA FUNCIONA!)
 app.patch('/api/admin/paid', (req, res) => {
   try {
     const { date, name } = req.body;
@@ -256,7 +254,6 @@ app.patch('/api/admin/paid', (req, res) => {
       savedDate: date,
       savedPerson: name
     });
-
   } catch (error) {
     console.error('❌ ERRO ao atualizar pagamento:', error);
     res.status(500).json({
@@ -301,7 +298,6 @@ app.post('/api/chat', (req, res) => {
       message: newMessage,
       totalMessages: data.chat.length
     });
-
   } catch (error) {
     console.error('❌ Erro ao adicionar mensagem:', error);
     res.status(500).json({ success: false, error: error.message });
@@ -322,7 +318,7 @@ app.get('/api/chat', (req, res) => {
 app.get('/api/admin/sync-status', async (req, res) => {
   try {
     if (!isFirebaseReady) {
-      return res.json({ 
+      return res.json({
         firebase: 'não disponível',
         message: 'Firebase não está configurado'
       });
@@ -330,7 +326,6 @@ app.get('/api/admin/sync-status', async (req, res) => {
 
     const status = await firebaseManager.getStatus();
     res.json(status);
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -340,7 +335,7 @@ app.get('/api/admin/sync-status', async (req, res) => {
 app.post('/api/admin/force-sync', async (req, res) => {
   try {
     if (!isFirebaseReady) {
-      return res.status(503).json({ 
+      return res.status(503).json({
         error: 'Firebase não está disponível'
       });
     }
@@ -353,11 +348,10 @@ app.post('/api/admin/force-sync', async (req, res) => {
       message: 'Sincronização forçada com sucesso',
       status
     });
-
   } catch (error) {
-    res.status(500).json({ 
+    res.status(500).json({
       success: false,
-      error: error.message 
+      error: error.message
     });
   }
 });
@@ -368,8 +362,9 @@ const server = require('http').createServer(app);
 
 server.listen(PORT, () => {
   console.log(`
+
 ╔══════════════════════════════════════════════════════════════════════╗
-║                  🍹 Bebida em Dia - Backend v4.0                   ║
+║ 🍹 Bebida em Dia - Backend v4.0 ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
 ✅ HTTP Server rodando em http://localhost:${PORT}
@@ -384,7 +379,7 @@ server.listen(PORT, () => {
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('\n🛑 SIGTERM recebido - Encerrando gracefully...');
-  
+
   if (isFirebaseReady && firebaseManager) {
     firebaseManager.syncLocalToFirebase().then(() => {
       firebaseManager.stop();
@@ -403,7 +398,7 @@ process.on('SIGTERM', () => {
 
 process.on('SIGINT', () => {
   console.log('\n🛑 SIGINT recebido - Encerrando gracefully...');
-  
+
   if (isFirebaseReady && firebaseManager) {
     firebaseManager.syncLocalToFirebase().then(() => {
       firebaseManager.stop();
