@@ -1,416 +1,360 @@
-// 🔥 Bebida em Dia - Backend com Firebase Realtime Database
-
-// v4.0 - Firebase Realtime Database + Auto-Sync
+// 🔥 Bebida em Dia - Backend com MySQL
+// v5.0 - MySQL Database
 
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
 require('dotenv').config();
-const FirebaseManager = require('./firebase-manager');
+const MySQLManager = require('./mysql-manager');
 
 // ========== CONFIGURAÇÃO EXPRESS ==========
-
 const app = express();
 const PORT = process.env.PORT || 3000;
-const FIREBASE_URL = process.env.FIREBASE_URL || 'https://bebidaemdia-default-rtdb.firebaseio.com/';
 
 // Middleware
 app.use(cors({
-  origin: '*',
-  methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
-  credentials: true,
-  optionsSuccessStatus: 200
+    origin: '*',
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
+    credentials: true,
+    optionsSuccessStatus: 200
 }));
-
 app.use(express.json());
 app.use(express.static('public'));
 
-const DATA_FILE = './data.json';
-
-// ========== INICIALIZAR FIREBASE ==========
-
-let firebaseManager;
-let isFirebaseReady = false;
+// ========== INICIALIZAR MySQL ==========
+let db;
+let isDBReady = false;
 
 (async () => {
-  try {
-    firebaseManager = new FirebaseManager('./serviceAccountKey.json', FIREBASE_URL);
-    await firebaseManager.loadFromFirebase();
-    isFirebaseReady = true;
-    console.log('🚀 Sistema pronto para usar!\n');
-  } catch (error) {
-    console.error('⚠️ Firebase não disponível, continuando com arquivo local');
-    console.error(' Instale firebase-admin: npm install firebase-admin\n');
-  }
+    try {
+        db = new MySQLManager({
+            host: process.env.DB_HOST || 'sql10.freesqldatabase.com',
+            user: process.env.DB_USER || 'sql10810558',
+            password: process.env.DB_PASSWORD,
+            database: process.env.DB_NAME || 'sql10810558',
+            port: process.env.DB_PORT || 3306
+        });
+
+        await db.connect();
+        isDBReady = true;
+        console.log('🚀 Sistema pronto para usar!\n');
+    } catch (error) {
+        console.error('⚠️ MySQL não disponível:', error.message);
+        console.error('Verifique as variáveis de ambiente no .env\n');
+    }
 })();
-
-// ========== FUNÇÕES AUXILIARES ==========
-
-function readData() {
-  try {
-    if (!fs.existsSync(DATA_FILE)) {
-      return { people: [], paidDates: {}, chat: [], settings: {} };
-    }
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
-  } catch (error) {
-    console.error('❌ Erro ao ler data.json:', error);
-    return { people: [], paidDates: {}, chat: [], settings: {} };
-  }
-}
-
-function writeData(data, reason = 'manual') {
-  try {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf8');
-    console.log(`✅ Dados salvos localmente: ${reason}`);
-
-    // Disparar sincronização com Firebase se estiver disponível
-    if (isFirebaseReady && firebaseManager) {
-      firebaseManager.syncLocalToFirebase();
-    }
-
-    return true;
-  } catch (error) {
-    console.error('❌ Erro ao salvar data.json:', error);
-    return false;
-  }
-}
 
 // ========== ROTAS API ==========
 
 // ✅ GET /api/data - Obter todos os dados
-app.get('/api/data', (req, res) => {
-  try {
-    const data = readData();
-    res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao obter dados' });
-  }
+app.get('/api/data', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
+
+        const people = await db.getAllPeople();
+        const paidDates = await db.getAllPaidDates();
+        const chat = await db.getAllChatMessages();
+        const settings = await db.getAllSettings();
+
+        res.json({ people, paidDates, chat, settings });
+    } catch (error) {
+        console.error('❌ Erro ao obter dados:', error);
+        res.status(500).json({ error: 'Erro ao obter dados' });
+    }
 });
 
 // ✅ GET /api/next-person - Próxima pessoa a pagar
-app.get('/api/next-person', (req, res) => {
-  try {
-    const data = readData();
-    const people = data.people || [];
+app.get('/api/next-person', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
 
-    if (people.length === 0) {
-      return res.json({ nextPerson: null });
+        const people = await db.getAllPeople();
+        if (people.length === 0) {
+            return res.json({ nextPerson: null });
+        }
+
+        const contributors = await db.getTopContributors(people.length);
+        const counts = {};
+        people.forEach(p => counts[p] = 0);
+        contributors.forEach(c => counts[c.name] = c.count);
+
+        const nextPerson = people.reduce((prev, curr) => {
+            return counts[curr] < counts[prev] ? curr : prev;
+        });
+
+        console.log('📊 Próxima pessoa calculada:', nextPerson);
+        res.json({ nextPerson });
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        res.status(500).json({ error: 'Erro ao obter próxima pessoa' });
     }
-
-    const paidDates = data.paidDates || {};
-    const counts = {};
-
-    people.forEach(person => {
-      counts[person] = Object.values(paidDates).filter(p => p === person).length;
-    });
-
-    const nextPerson = people.reduce((prev, curr) => {
-      return counts[curr] < counts[prev] ? curr : prev;
-    });
-
-    console.log('📊 Próxima pessoa calculada:', nextPerson);
-    res.json({ nextPerson });
-  } catch (error) {
-    res.status(500).json({ error: 'Erro ao obter próxima pessoa' });
-  }
 });
 
 // ✅ GET /api/health - Status do servidor
 app.get('/api/health', async (req, res) => {
-  try {
-    const firebaseStatus = isFirebaseReady ? await firebaseManager.getStatus() : { status: 'Firebase não disponível' };
-    res.json({
-      status: 'ok',
-      timestamp: new Date().toISOString(),
-      version: '4.0',
-      firebase: firebaseStatus,
-      platform: 'Render'
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+    try {
+        const dbStatus = isDBReady ? await db.healthCheck() : { status: 'MySQL não disponível' };
+        res.json({
+            status: 'ok',
+            timestamp: new Date().toISOString(),
+            version: '5.0',
+            database: dbStatus,
+            platform: 'Render'
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // ========== ROTAS ADMIN ==========
 
 // ✅ POST /api/admin/login - Autenticação
 app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-
-  if (password === process.env.ADMIN_PASSWORD || password === 'coca') {
-    const token = 'admin_token_' + Date.now();
-    res.json({
-      success: true,
-      token,
-      message: 'Login realizado com sucesso'
-    });
-  } else {
-    res.status(401).json({
-      success: false,
-      error: 'Senha incorreta'
-    });
-  }
+    const { password } = req.body;
+    if (password === process.env.ADMIN_PASSWORD || password === 'coca') {
+        const token = 'admin_token_' + Date.now();
+        res.json({
+            success: true,
+            token,
+            message: 'Login realizado com sucesso'
+        });
+    } else {
+        res.status(401).json({
+            success: false,
+            error: 'Senha incorreta'
+        });
+    }
 });
 
 // ✅ GET /api/admin/data - Obter dados admin
-app.get('/api/admin/data', (req, res) => {
-  try {
-    const data = readData();
-    res.json({
-      success: true,
-      people: data.people || [],
-      paidDates: data.paidDates || {},
-      chat: data.chat || [],
-      settings: data.settings || {}
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
+app.get('/api/admin/data', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ success: false, error: 'Database não disponível' });
+        }
+
+        const people = await db.getAllPeople();
+        const paidDates = await db.getAllPaidDates();
+        const chat = await db.getAllChatMessages();
+        const settings = await db.getAllSettings();
+
+        res.json({
+            success: true,
+            people,
+            paidDates,
+            chat,
+            settings
+        });
+    } catch (error) {
+        console.error('❌ Erro:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
 // ✅ POST /api/admin/people - Adicionar pessoa
-app.post('/api/admin/people', (req, res) => {
-  try {
-    const { name } = req.body;
+app.post('/api/admin/people', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
 
-    if (!name || typeof name !== 'string' || name.trim().length === 0) {
-      return res.status(400).json({ error: 'Nome inválido' });
+        const { name } = req.body;
+        if (!name || typeof name !== 'string' || name.trim().length === 0) {
+            return res.status(400).json({ error: 'Nome inválido' });
+        }
+
+        const exists = await db.personExists(name.trim());
+        if (exists) {
+            return res.status(400).json({ error: 'Pessoa já existe' });
+        }
+
+        await db.addPerson(name.trim());
+        const people = await db.getAllPeople();
+
+        console.log(`✅ Pessoa adicionada: ${name.trim()}`);
+        res.json({
+            success: true,
+            people,
+            message: 'Pessoa adicionada com sucesso'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao adicionar pessoa:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    const data = readData();
-
-    if (!data.people.includes(name.trim())) {
-      data.people.push(name.trim());
-      writeData(data, `add_person:${name}`);
-    }
-
-    res.json({
-      success: true,
-      people: data.people,
-      message: 'Pessoa adicionada com sucesso'
-    });
-  } catch (error) {
-    console.error('❌ Erro ao adicionar pessoa:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
 });
 
 // ✅ DELETE /api/admin/people/:name - Remover pessoa
-app.delete('/api/admin/people/:name', (req, res) => {
-  try {
-    const { name } = req.params;
-    const decodedName = decodeURIComponent(name);
-    const data = readData();
+app.delete('/api/admin/people/:name', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
 
-    data.people = data.people.filter(p => p !== decodedName);
+        const { name } = req.params;
+        const decodedName = decodeURIComponent(name);
 
-    // Remover pagamentos dessa pessoa
-    Object.keys(data.paidDates).forEach(date => {
-      if (data.paidDates[date] === decodedName) {
-        delete data.paidDates[date];
-      }
-    });
+        await db.removePerson(decodedName);
+        const people = await db.getAllPeople();
+        const paidDates = await db.getAllPaidDates();
 
-    writeData(data, `remove_person:${decodedName}`);
-
-    res.json({
-      success: true,
-      people: data.people,
-      paidDates: data.paidDates,
-      message: 'Pessoa removida com sucesso'
-    });
-  } catch (error) {
-    console.error('❌ Erro ao remover pessoa:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
+        console.log(`✅ Pessoa removida: ${decodedName}`);
+        res.json({
+            success: true,
+            people,
+            paidDates,
+            message: 'Pessoa removida com sucesso'
+        });
+    } catch (error) {
+        console.error('❌ Erro ao remover pessoa:', error);
+        res.status(500).json({ success: false, error: error.message });
+    }
 });
 
-// ✅ PATCH /api/admin/paid - Atualizar pagamento (CORRIGIDO - AGORA FUNCIONA!)
-app.patch('/api/admin/paid', (req, res) => {
-  try {
-    const { date, name } = req.body;
+// ✅ PATCH /api/admin/paid - Atualizar pagamento
+app.patch('/api/admin/paid', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
 
-    if (!date) {
-      return res.status(400).json({ error: 'Data não fornecida' });
+        const { date, name } = req.body;
+        if (!date) {
+            return res.status(400).json({ error: 'Data não fornecida' });
+        }
+
+        if (name === null || name === undefined || name === '') {
+            await db.removePaidDate(date);
+            console.log(`🗑️ Pagamento removido: ${date}`);
+        } else {
+            await db.addPaidDate(date, name);
+            console.log(`✅ PAGAMENTO REGISTRADO: ${date} -> ${name}`);
+        }
+
+        const paidDates = await db.getAllPaidDates();
+
+        res.json({
+            success: true,
+            paidDates,
+            message: '✅ Pagamento salvo com sucesso!',
+            timestamp: new Date().toISOString(),
+            savedDate: date,
+            savedPerson: name
+        });
+    } catch (error) {
+        console.error('❌ ERRO ao atualizar pagamento:', error);
+        res.status(500).json({
+            success: false,
+            error: error.message
+        });
     }
-
-    const data = readData();
-
-    if (name === null || name === undefined || name === '') {
-      delete data.paidDates[date];
-      console.log(`🗑️ Pagamento removido: ${date}`);
-    } else {
-      data.paidDates[date] = name;
-      console.log(`✅ PAGAMENTO REGISTRADO: ${date} -> ${name}`);
-    }
-
-    writeData(data, `update_payment:${date}:${name}`);
-
-    res.json({
-      success: true,
-      paidDates: data.paidDates,
-      message: '✅ Pagamento salvo e sincronizado com Firebase!',
-      timestamp: new Date().toISOString(),
-      savedDate: date,
-      savedPerson: name
-    });
-  } catch (error) {
-    console.error('❌ ERRO ao atualizar pagamento:', error);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
 });
 
 // ✅ POST /api/chat - Adicionar mensagem ao chat
-app.post('/api/chat', (req, res) => {
-  try {
-    const { userName, text } = req.body;
+app.post('/api/chat', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
 
-    if (!userName || !text) {
-      return res.status(400).json({ error: 'userName e text são obrigatórios' });
+        const { userName, text } = req.body;
+        if (!userName || !text) {
+            return res.status(400).json({ error: 'userName e text são obrigatórios' });
+        }
+
+        const newMessage = await db.addChatMessage(userName.trim(), text.trim());
+
+        // Limpar mensagens antigas (manter apenas últimas 100)
+        await db.clearOldChatMessages(100);
+
+        const totalMessages = (await db.getAllChatMessages()).length;
+
+        console.log(`💬 Mensagem adicionada: ${userName}`);
+        res.json({
+            success: true,
+            message: newMessage,
+            totalMessages
+        });
+    } catch (error) {
+        console.error('❌ Erro ao adicionar mensagem:', error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    const data = readData();
-    const newMessage = {
-      id: Date.now().toString(),
-      userName: userName.trim(),
-      text: text.trim(),
-      timestamp: new Date().toISOString()
-    };
-
-    if (!data.chat) {
-      data.chat = [];
-    }
-
-    data.chat.push(newMessage);
-
-    // Manter apenas últimas 100 mensagens
-    if (data.chat.length > 100) {
-      data.chat = data.chat.slice(-100);
-    }
-
-    writeData(data, `chat_message:${userName}`);
-
-    res.json({
-      success: true,
-      message: newMessage,
-      totalMessages: data.chat.length
-    });
-  } catch (error) {
-    console.error('❌ Erro ao adicionar mensagem:', error);
-    res.status(500).json({ success: false, error: error.message });
-  }
 });
 
 // ✅ GET /api/chat - Obter histórico de chat
-app.get('/api/chat', (req, res) => {
-  try {
-    const data = readData();
-    res.json(data.chat || []);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+app.get('/api/chat', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
+
+        const chat = await db.getAllChatMessages();
+        res.json(chat);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
-// ✅ GET /api/admin/sync-status - Status de sincronização Firebase
-app.get('/api/admin/sync-status', async (req, res) => {
-  try {
-    if (!isFirebaseReady) {
-      return res.json({
-        firebase: 'não disponível',
-        message: 'Firebase não está configurado'
-      });
+// ✅ GET /api/admin/stats - Estatísticas
+app.get('/api/admin/stats', async (req, res) => {
+    try {
+        if (!isDBReady) {
+            return res.status(503).json({ error: 'Database não disponível' });
+        }
+
+        const stats = await db.getStats();
+        const topContributors = await db.getTopContributors(5);
+        const monthlyStats = await db.getMonthlyStats();
+
+        res.json({
+            success: true,
+            stats,
+            topContributors,
+            monthlyStats
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    const status = await firebaseManager.getStatus();
-    res.json(status);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ✅ POST /api/admin/force-sync - Forçar sincronização agora
-app.post('/api/admin/force-sync', async (req, res) => {
-  try {
-    if (!isFirebaseReady) {
-      return res.status(503).json({
-        error: 'Firebase não está disponível'
-      });
-    }
-
-    await firebaseManager.syncLocalToFirebase();
-    const status = await firebaseManager.getStatus();
-
-    res.json({
-      success: true,
-      message: 'Sincronização forçada com sucesso',
-      status
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
 });
 
 // ========== INICIAR SERVIDOR ==========
-
 const server = require('http').createServer(app);
 
 server.listen(PORT, () => {
-  console.log(`
-
+    console.log(`
 ╔══════════════════════════════════════════════════════════════════════╗
-║ 🍹 Bebida em Dia - Backend v4.0 ║
+║ 🍹 Bebida em Dia - Backend v5.0 ║
 ╚══════════════════════════════════════════════════════════════════════╝
 
 ✅ HTTP Server rodando em http://localhost:${PORT}
-🔥 Firebase Realtime Database: ${isFirebaseReady ? '✓ Conectado' : '✗ Não disponível'}
-📡 Auto-Sync: ATIVADO (a cada 5 segundos)
-💾 Armazenamento: Firebase + Local (data.json)
+🗄️  MySQL Database: ${isDBReady ? '✓ Conectado' : '✗ Não disponível'}
+💾 Armazenamento: MySQL
 🚀 Pronto para produção em Render!
 
 `);
 });
 
 // Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('\n🛑 SIGTERM recebido - Encerrando gracefully...');
-
-  if (isFirebaseReady && firebaseManager) {
-    firebaseManager.syncLocalToFirebase().then(() => {
-      firebaseManager.stop();
-      server.close(() => {
+process.on('SIGTERM', async () => {
+    console.log('\n🛑 SIGTERM recebido - Encerrando gracefully...');
+    if (isDBReady && db) {
+        await db.close();
+    }
+    server.close(() => {
         console.log('✅ Servidor encerrado com sucesso');
         process.exit(0);
-      });
     });
-  } else {
-    server.close(() => {
-      console.log('✅ Servidor encerrado com sucesso');
-      process.exit(0);
-    });
-  }
 });
 
-process.on('SIGINT', () => {
-  console.log('\n🛑 SIGINT recebido - Encerrando gracefully...');
-
-  if (isFirebaseReady && firebaseManager) {
-    firebaseManager.syncLocalToFirebase().then(() => {
-      firebaseManager.stop();
-      server.close(() => {
+process.on('SIGINT', async () => {
+    console.log('\n🛑 SIGINT recebido - Encerrando gracefully...');
+    if (isDBReady && db) {
+        await db.close();
+    }
+    server.close(() => {
         console.log('✅ Servidor encerrado com sucesso');
         process.exit(0);
-      });
     });
-  } else {
-    server.close(() => {
-      console.log('✅ Servidor encerrado com sucesso');
-      process.exit(0);
-    });
-  }
 });
