@@ -1,5 +1,5 @@
-// 🔥 Bebida em Dia - Backend com MySQL
-// v5.0 - MySQL Database
+// 🔥 Bebida em Dia - Backend com MySQL v5.0
+// CORRIGIDO - Sem template literals problemáticos
 
 const express = require('express');
 const cors = require('cors');
@@ -78,10 +78,10 @@ app.get('/api/next-person', async (req, res) => {
 
         const contributors = await db.getTopContributors(people.length);
         const counts = {};
-        people.forEach(p => counts[p] = 0);
-        contributors.forEach(c => counts[c.name] = c.count);
+        people.forEach(function(p) { counts[p] = 0; });
+        contributors.forEach(function(c) { counts[c.name] = c.count; });
 
-        const nextPerson = people.reduce((prev, curr) => {
+        const nextPerson = people.reduce(function(prev, curr) {
             return counts[curr] < counts[prev] ? curr : prev;
         });
 
@@ -112,13 +112,13 @@ app.get('/api/health', async (req, res) => {
 // ========== ROTAS ADMIN ==========
 
 // ✅ POST /api/admin/login - Autenticação
-app.post('/api/admin/login', (req, res) => {
-    const { password } = req.body;
+app.post('/api/admin/login', function(req, res) {
+    var password = req.body.password;
     if (password === process.env.ADMIN_PASSWORD || password === 'coca') {
-        const token = 'admin_token_' + Date.now();
+        var token = 'admin_token_' + Date.now();
         res.json({
             success: true,
-            token,
+            token: token,
             message: 'Login realizado com sucesso'
         });
     } else {
@@ -143,10 +143,10 @@ app.get('/api/admin/data', async (req, res) => {
 
         res.json({
             success: true,
-            people,
-            paidDates,
-            chat,
-            settings
+            people: people,
+            paidDates: paidDates,
+            chat: chat,
+            settings: settings
         });
     } catch (error) {
         console.error('❌ Erro:', error);
@@ -161,23 +161,23 @@ app.post('/api/admin/people', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const { name } = req.body;
+        var name = req.body.name;
         if (!name || typeof name !== 'string' || name.trim().length === 0) {
             return res.status(400).json({ error: 'Nome inválido' });
         }
 
-        const exists = await db.personExists(name.trim());
+        var exists = await db.personExists(name.trim());
         if (exists) {
             return res.status(400).json({ error: 'Pessoa já existe' });
         }
 
         await db.addPerson(name.trim());
-        const people = await db.getAllPeople();
+        var people = await db.getAllPeople();
 
-        console.log(`✅ Pessoa adicionada: ${name.trim()}`);
+        console.log('✅ Pessoa adicionada: ' + name.trim());
         res.json({
             success: true,
-            people,
+            people: people,
             message: 'Pessoa adicionada com sucesso'
         });
     } catch (error) {
@@ -193,18 +193,18 @@ app.delete('/api/admin/people/:name', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const { name } = req.params;
-        const decodedName = decodeURIComponent(name);
+        var name = req.params.name;
+        var decodedName = decodeURIComponent(name);
 
         await db.removePerson(decodedName);
-        const people = await db.getAllPeople();
-        const paidDates = await db.getAllPaidDates();
+        var people = await db.getAllPeople();
+        var paidDates = await db.getAllPaidDates();
 
-        console.log(`✅ Pessoa removida: ${decodedName}`);
+        console.log('✅ Pessoa removida: ' + decodedName);
         res.json({
             success: true,
-            people,
-            paidDates,
+            people: people,
+            paidDates: paidDates,
             message: 'Pessoa removida com sucesso'
         });
     } catch (error) {
@@ -220,24 +220,26 @@ app.patch('/api/admin/paid', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const { date, name } = req.body;
+        var date = req.body.date;
+        var name = req.body.name;
+
         if (!date) {
             return res.status(400).json({ error: 'Data não fornecida' });
         }
 
         if (name === null || name === undefined || name === '') {
             await db.removePaidDate(date);
-            console.log(`🗑️ Pagamento removido: ${date}`);
+            console.log('🗑️ Pagamento removido: ' + date);
         } else {
             await db.addPaidDate(date, name);
-            console.log(`✅ PAGAMENTO REGISTRADO: ${date} -> ${name}`);
+            console.log('✅ PAGAMENTO REGISTRADO: ' + date + ' -> ' + name);
         }
 
-        const paidDates = await db.getAllPaidDates();
+        var paidDates = await db.getAllPaidDates();
 
         res.json({
             success: true,
-            paidDates,
+            paidDates: paidDates,
             message: '✅ Pagamento salvo com sucesso!',
             timestamp: new Date().toISOString(),
             savedDate: date,
@@ -259,23 +261,26 @@ app.post('/api/chat', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const { userName, text } = req.body;
+        var userName = req.body.userName;
+        var text = req.body.text;
+
         if (!userName || !text) {
             return res.status(400).json({ error: 'userName e text são obrigatórios' });
         }
 
-        const newMessage = await db.addChatMessage(userName.trim(), text.trim());
+        var newMessage = await db.addChatMessage(userName.trim(), text.trim());
 
         // Limpar mensagens antigas (manter apenas últimas 100)
         await db.clearOldChatMessages(100);
 
-        const totalMessages = (await db.getAllChatMessages()).length;
+        var allMessages = await db.getAllChatMessages();
+        var totalMessages = allMessages.length;
 
-        console.log(`💬 Mensagem adicionada: ${userName}`);
+        console.log('💬 Mensagem adicionada: ' + userName);
         res.json({
             success: true,
             message: newMessage,
-            totalMessages
+            totalMessages: totalMessages
         });
     } catch (error) {
         console.error('❌ Erro ao adicionar mensagem:', error);
@@ -290,7 +295,7 @@ app.get('/api/chat', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const chat = await db.getAllChatMessages();
+        var chat = await db.getAllChatMessages();
         res.json(chat);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -304,15 +309,15 @@ app.get('/api/admin/stats', async (req, res) => {
             return res.status(503).json({ error: 'Database não disponível' });
         }
 
-        const stats = await db.getStats();
-        const topContributors = await db.getTopContributors(5);
-        const monthlyStats = await db.getMonthlyStats();
+        var stats = await db.getStats();
+        var topContributors = await db.getTopContributors(5);
+        var monthlyStats = await db.getMonthlyStats();
 
         res.json({
             success: true,
-            stats,
-            topContributors,
-            monthlyStats
+            stats: stats,
+            topContributors: topContributors,
+            monthlyStats: monthlyStats
         });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
@@ -320,40 +325,39 @@ app.get('/api/admin/stats', async (req, res) => {
 });
 
 // ========== INICIAR SERVIDOR ==========
-const server = require('http').createServer(app);
+var server = require('http').createServer(app);
 
-server.listen(PORT, () => {
-    console.log(`
-╔══════════════════════════════════════════════════════════════════════╗
-║ 🍹 Bebida em Dia - Backend v5.0 ║
-╚══════════════════════════════════════════════════════════════════════╝
-
-✅ HTTP Server rodando em http://localhost:${PORT}
-🗄️  MySQL Database: ${isDBReady ? '✓ Conectado' : '✗ Não disponível'}
-💾 Armazenamento: MySQL
-🚀 Pronto para produção em Render!
-
-`);
+server.listen(PORT, function() {
+    console.log('');
+    console.log('╔══════════════════════════════════════════════════════════════════════╗');
+    console.log('║              🍹 Bebida em Dia - Backend v5.0                         ║');
+    console.log('╚══════════════════════════════════════════════════════════════════════╝');
+    console.log('');
+    console.log('✅ HTTP Server rodando em http://localhost:' + PORT);
+    console.log('🗄️  MySQL Database: ' + (isDBReady ? '✓ Conectado' : '✗ Não disponível'));
+    console.log('💾 Armazenamento: MySQL');
+    console.log('🚀 Pronto para produção em Render!');
+    console.log('');
 });
 
 // Graceful shutdown
-process.on('SIGTERM', async () => {
+process.on('SIGTERM', async function() {
     console.log('\n🛑 SIGTERM recebido - Encerrando gracefully...');
     if (isDBReady && db) {
         await db.close();
     }
-    server.close(() => {
+    server.close(function() {
         console.log('✅ Servidor encerrado com sucesso');
         process.exit(0);
     });
 });
 
-process.on('SIGINT', async () => {
+process.on('SIGINT', async function() {
     console.log('\n🛑 SIGINT recebido - Encerrando gracefully...');
     if (isDBReady && db) {
         await db.close();
     }
-    server.close(() => {
+    server.close(function() {
         console.log('✅ Servidor encerrado com sucesso');
         process.exit(0);
     });
