@@ -1,4 +1,4 @@
-// ✅ MySQL Database Manager
+// ✅ MySQL Database Manager - CORRIGIDO
 // Gerencia conexão e operações com MySQL
 
 const mysql = require('mysql2/promise');
@@ -35,8 +35,8 @@ class MySQLManager {
 
             this.isConnected = true;
             console.log('✅ MySQL conectado com sucesso!');
-            console.log(`📍 Database: ${this.config.database}`);
-            console.log(`🌍 Host: ${this.config.host}\n`);
+            console.log('📍 Database: ' + this.config.database);
+            console.log('🌍 Host: ' + this.config.host + '\n');
 
             return true;
         } catch (error) {
@@ -159,14 +159,13 @@ class MySQLManager {
     }
 
     async clearOldChatMessages(keepLast = 100) {
-        await this.query(
-            \`DELETE FROM chat WHERE id NOT IN (
-                SELECT id FROM (
-                    SELECT id FROM chat ORDER BY timestamp DESC LIMIT ?
-                ) as keep_messages
-            )\`,
-            [keepLast]
-        );
+        // Forma simplificada sem subquery complexa
+        const rows = await this.query('SELECT id FROM chat ORDER BY timestamp DESC LIMIT ?', [keepLast]);
+        if (rows.length > 0) {
+            const idsToKeep = rows.map(r => r.id);
+            const placeholders = idsToKeep.map(() => '?').join(',');
+            await this.query('DELETE FROM chat WHERE id NOT IN (' + placeholders + ')', idsToKeep);
+        }
         return { success: true };
     }
 
@@ -211,11 +210,7 @@ class MySQLManager {
 
     async getTopContributors(limit = 5) {
         const rows = await this.query(
-            \`SELECT person_name, COUNT(*) as count 
-             FROM paid_dates 
-             GROUP BY person_name 
-             ORDER BY count DESC 
-             LIMIT ?\`,
+            'SELECT person_name, COUNT(*) as count FROM paid_dates GROUP BY person_name ORDER BY count DESC LIMIT ?',
             [limit]
         );
         return rows.map(row => ({
@@ -226,13 +221,7 @@ class MySQLManager {
 
     async getMonthlyStats() {
         const rows = await this.query(
-            \`SELECT 
-                DATE_FORMAT(date, '%Y-%m') as month,
-                COUNT(*) as count
-             FROM paid_dates
-             GROUP BY month
-             ORDER BY month DESC
-             LIMIT 12\`
+            "SELECT DATE_FORMAT(date, '%Y-%m') as month, COUNT(*) as count FROM paid_dates GROUP BY month ORDER BY month DESC LIMIT 12"
         );
         return rows;
     }
