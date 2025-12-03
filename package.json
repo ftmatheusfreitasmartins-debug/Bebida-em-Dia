@@ -1,29 +1,25 @@
 {
-  "name": "bebida-em-dia",
-  "version": "4.0.0",
-  "description": "Sistema de controle de bebida em dia com Firebase",
-  "engines": {
-    "node": "18.x"
-  },
+  "name": "bebida-em-dia-backend",
+  "version": "5.0.0",
+  "description": "Backend com MySQL para sistema Bebida em Dia",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "nodemon server.js"
   },
-  "keywords": [
-    "bebida",
-    "rotação",
-    "firebase",
-    "realtime-database"
-  ],
-  "author": "Matheus",
-  "license": "MIT",
   "dependencies": {
-    "bcryptjs": "^2.4.3",
+    "express": "^4.18.2",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "firebase-admin": "^12.0.0",
-    "jsonwebtoken": "^9.0.2",
-    "ws": "^8.18.3"
-  }
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["mysql", "express", "api", "backend"],
+  "author": "Matheus Freitas",
+  "license": "MIT"
 }
