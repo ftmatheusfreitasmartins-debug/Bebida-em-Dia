@@ -1,0 +1,335 @@
+/* ============================================================================
+  USER UI (ABA DE USUÁRIOS) - Reformulação completa via override
+  Arquivo: public/css/user-ui.css
+============================================================================ */
+
+.main-content {
+  max-width: 1120px;
+}
+
+/* HERO / DASH */
+.uDash {
+  position: relative;
+  overflow: hidden;
+  border-radius: calc(var(--border-radius-lg) + 0.25rem);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  background: linear-gradient(135deg, rgba(16, 23, 42, 0.96), rgba(30, 42, 60, 0.92));
+  box-shadow: var(--shadow-xl);
+  margin-bottom: 1.75rem;
+}
+
+.uDash__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 450px at 12% 8%, rgba(59, 130, 246, 0.28), transparent 60%),
+    radial-gradient(900px 450px at 92% 12%, rgba(52, 211, 153, 0.18), transparent 60%),
+    radial-gradient(700px 480px at 70% 95%, rgba(251, 191, 36, 0.10), transparent 55%);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.uDash__top,
+.uDash__grid {
+  position: relative;
+  z-index: 1;
+}
+
+.uDash__top {
+  padding: 1.6rem 1.6rem 1.15rem 1.6rem;
+  display: grid;
+  grid-template-columns: 1.25fr 0.75fr;
+  gap: 1rem;
+  align-items: start;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.uDash__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.10);
+  color: var(--text-secondary);
+  font-weight: 700;
+  width: fit-content;
+  margin-bottom: 0.9rem;
+}
+
+.uDash__title h1 {
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.55rem, 2.2vw, 2.05rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.6rem;
+}
+
+.uDash__title p {
+  color: var(--text-secondary);
+  max-width: 72ch;
+}
+
+.uDash__actions {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.uDash__primaryBtn {
+  border: 0;
+  cursor: pointer;
+  width: 100%;
+  padding: 0.95rem 1rem;
+  border-radius: calc(var(--border-radius-lg) + 0.2rem);
+  background: var(--gradient-btn);
+  color: var(--text-primary);
+  box-shadow: 0 14px 34px rgba(59, 130, 246, 0.20);
+  display: grid;
+  grid-template-columns: 52px 1fr 44px;
+  gap: 0.9rem;
+  align-items: center;
+  transition: var(--transition);
+}
+
+.uDash__primaryBtn:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+  filter: grayscale(0.1);
+}
+
+.uDash__primaryIcon,
+.uDash__primaryChevron {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.14);
+}
+
+.uDash__primaryChevron {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(0,0,0,0.14);
+}
+
+.uDash__primaryText {
+  display: grid;
+  gap: 0.15rem;
+  text-align: left;
+}
+
+.uDash__primaryLabel {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.uDash__primaryHint {
+  font-size: 0.92rem;
+  opacity: 0.95;
+}
+
+.uDash__secondaryRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.uDash__chip {
+  min-height: 48px;
+  border-radius: calc(var(--border-radius) + 0.15rem);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 800;
+}
+
+.uDash__chip:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.10);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+/* GRID DE CARDS E ATALHOS */
+.uDash__grid {
+  padding: 1.25rem 1.6rem 1.6rem 1.6rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+
+.uCard {
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  padding: 1rem;
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.uCard--accent { border-color: rgba(59, 130, 246, 0.26); }
+.uCard--success { border-color: rgba(52, 211, 153, 0.26); background: linear-gradient(135deg, rgba(52, 211, 153, 0.10), rgba(0,0,0,0.10)); }
+
+.uCard__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: var(--accent-primary);
+}
+
+.uCard__value {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.uCard__label {
+  color: var(--text-muted);
+  font-size: 0.86rem;
+  margin-top: 0.1rem;
+}
+
+.uShortcut {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.12);
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  padding: 1rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  text-align: left;
+  color: var(--text-primary);
+}
+
+.uShortcut:hover {
+  transform: translateY(-3px);
+  border-color: rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.08);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+}
+
+.uShortcut__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: var(--accent-primary);
+}
+
+.uShortcut__title {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.uShortcut__desc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.uShortcut__arrow {
+  margin-left: auto;
+  color: rgba(255,255,255,0.45);
+}
+
+/* PANELS (Ranking/Histórico/Calendário) */
+.uPanel .panel-header {
+  gap: 1rem;
+  align-items: center;
+}
+
+.uPanel__header {
+  padding-bottom: 0.9rem;
+}
+
+.uPanel__hint {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 0.4rem 0.75rem;
+}
+
+/* Lista mais “card” */
+.uList .list-item {
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.10);
+  padding: 1rem 1rem;
+}
+
+/* Histórico toggle mais “limpo” */
+.uHistoryToggle {
+  margin-left: auto;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  padding: 0.55rem 0.8rem;
+  transition: var(--transition-fast);
+}
+
+.uHistoryToggle:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.uHistoryContent.open {
+  padding-top: 1rem;
+}
+
+/* Calendário topo */
+.uCalendarTop {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.uMonthTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* Calendário grid mais “flat” */
+.uCalendarGrid .calendar-day {
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+}
+
+/* Responsivo */
+@media (max-width: 1024px) {
+  .uDash__top { grid-template-columns: 1fr; }
+  .uDash__grid { grid-template-columns: 1fr; }
+  .uDash__secondaryRow { grid-template-columns: 1fr; }
+}

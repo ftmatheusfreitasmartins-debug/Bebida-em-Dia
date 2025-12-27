@@ -1,0 +1,300 @@
+/* ============================================================================
+   SECTIONS v3 — Ranking / Histórico / Calendário / Painéis
+   Arquivo: public/css/sections-v3.css
+   Observação: importe após styles.css para sobrescrever. [file:23]
+============================================================================ */
+
+/* -----------------------------
+   PAINEL (base)
+-------------------------------- */
+.panel{
+  background:
+    radial-gradient(900px 280px at 20% 0%, rgba(59,130,246,0.14), transparent 60%),
+    radial-gradient(700px 240px at 95% 10%, rgba(52,211,153,0.10), transparent 55%),
+    rgba(30, 42, 60, 0.78);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: calc(var(--border-radius-lg) + 0.2rem);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.35);
+  overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  position: relative;
+}
+
+.panel::before{
+  opacity: 1; /* no seu styles.css a barra aparece só no hover; aqui fica sempre. [file:23] */
+  height: 4px;
+  background: linear-gradient(90deg, rgba(59,130,246,1), rgba(52,211,153,0.9), rgba(251,191,36,0.8));
+}
+
+.panel:hover{
+  transform: translateY(-3px);
+  box-shadow: 0 26px 70px rgba(0,0,0,0.45);
+}
+
+.panel-header{
+  padding-bottom: 0.9rem;
+  margin-bottom: 1.1rem;
+  gap: .75rem;
+}
+
+.panel-icon{
+  order: -1; /* ícone vai para a esquerda sem mexer no HTML. [file:23] */
+  opacity: 1;
+  font-size: 1.25rem;
+}
+
+.panel-title{
+  font-size: 1.15rem;
+  letter-spacing: -0.01em;
+}
+
+/* Deixa cada painel com um “tema” */
+#rankingPanel::before{ background: linear-gradient(90deg, #60A5FA, #A78BFA); }
+#historyPanel::before{ background: linear-gradient(90deg, #34D399, #22C55E); }
+#calendarPanel::before{ background: linear-gradient(90deg, #FBBF24, #60A5FA); }
+
+/* -----------------------------
+   RANKING (lista)
+-------------------------------- */
+#leaderboard{
+  gap: .75rem;
+}
+
+#leaderboard .list-item{
+  /* remove o layout antigo com padding enorme e medalha por imagem. [file:23] */
+  padding: 1.05rem 1.1rem;
+  min-height: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.10);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.20);
+}
+
+#leaderboard .list-item::before,
+#leaderboard .list-item::after{
+  /* desliga medalha por imagem + barra lateral animada do styles.css. [file:23] */
+  content: none !important;
+}
+
+#leaderboard .list-item:hover{
+  transform: translateY(-2px);
+  border-color: rgba(59,130,246,0.35);
+  background: rgba(59,130,246,0.10);
+  box-shadow: 0 18px 40px rgba(59,130,246,0.18);
+}
+
+#leaderboard .person{
+  font-size: 1rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  gap: .6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#leaderboard .score{
+  /* vira “chip” compacto */
+  font-size: 0.95rem;
+  font-weight: 900;
+  padding: .5rem .75rem;
+  border-radius: 999px;
+  border: 1px solid rgba(59,130,246,0.35);
+  background: rgba(59,130,246,0.14);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+  white-space: nowrap;
+}
+
+#leaderboard .list-item:nth-child(1){
+  border-color: rgba(251,191,36,0.45);
+  background: linear-gradient(135deg, rgba(251,191,36,0.16), rgba(0,0,0,0.10));
+}
+#leaderboard .list-item:nth-child(2){
+  border-color: rgba(148,163,184,0.45);
+  background: linear-gradient(135deg, rgba(148,163,184,0.14), rgba(0,0,0,0.10));
+}
+#leaderboard .list-item:nth-child(3){
+  border-color: rgba(205,127,50,0.40);
+  background: linear-gradient(135deg, rgba(205,127,50,0.14), rgba(0,0,0,0.10));
+}
+
+/* -----------------------------
+   HISTÓRICO (toggle + timeline)
+-------------------------------- */
+/* Seu JS usa .open; aqui tratamos .open e também .active para compatibilidade. [file:27][file:23] */
+#historyContent{
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height .45s ease, opacity .25s ease, margin .25s ease;
+  margin-top: 0;
+}
+#historyContent.open,
+#historyContent.active{
+  max-height: 1200px;
+  opacity: 1;
+  margin-top: 1rem;
+}
+
+#historyToggle{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.12);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.22);
+  padding: 1rem 1.1rem;
+  border-radius: calc(var(--border-radius-lg) + 0.15rem);
+}
+
+#historyToggle:hover{
+  border-color: rgba(52,211,153,0.35);
+  background: rgba(52,211,153,0.08);
+  transform: translateY(-2px);
+}
+
+#historyToggle span{
+  -webkit-text-fill-color: unset;
+  background: none;
+  color: var(--text-primary);
+  font-weight: 800;
+}
+
+#paidHistory{
+  position: relative;
+  padding-left: 1.1rem;
+  gap: .6rem;
+}
+
+#paidHistory::before{
+  content:"";
+  position:absolute;
+  left: .35rem;
+  top: .25rem;
+  bottom: .25rem;
+  width: 2px;
+  background: linear-gradient(180deg, rgba(52,211,153,0.9), rgba(59,130,246,0.2));
+  opacity: .6;
+  border-radius: 999px;
+}
+
+#paidHistory .list-item{
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: .75rem;
+
+  padding: .85rem 1rem;
+  border-radius: calc(var(--border-radius-lg) + 0.05rem);
+
+  background: rgba(0,0,0,0.10);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.18);
+  position: relative;
+}
+
+#paidHistory .list-item::before{
+  content:"";
+  position:absolute;
+  left: -0.92rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(52,211,153,0.9);
+  box-shadow: 0 0 0 4px rgba(52,211,153,0.15);
+}
+
+#paidHistory .list-item:hover{
+  border-color: rgba(52,211,153,0.35);
+  background: rgba(52,211,153,0.08);
+  transform: translateX(4px);
+}
+
+/* -----------------------------
+   CALENDÁRIO (grid + cells)
+-------------------------------- */
+.calendar-nav{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.10);
+  box-shadow: 0 14px 40px rgba(0,0,0,0.25);
+  border-radius: calc(var(--border-radius-lg) + 0.15rem);
+  padding: 1rem 1.1rem;
+}
+
+.calendar-grid{
+  gap: .55rem;
+}
+
+.day-header{
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.08);
+  color: var(--text-secondary);
+  border-radius: 14px;
+}
+
+.calendar-day{
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.10);
+  min-height: 88px;
+  padding: .75rem .75rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.calendar-day:hover{
+  transform: translateY(-2px);
+  border-color: rgba(59,130,246,0.35);
+  background: rgba(59,130,246,0.08);
+  box-shadow: 0 16px 36px rgba(59,130,246,0.16);
+}
+
+.day-number{
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.payer-badge{
+  align-self: flex-end;
+  font-size: .78rem;
+  font-weight: 900;
+  color: var(--text-primary);
+
+  padding: .25rem .55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* pago */
+.calendar-day.paid{
+  border-color: rgba(52,211,153,0.35);
+  background: linear-gradient(135deg, rgba(52,211,153,0.16), rgba(0,0,0,0.10));
+  box-shadow: 0 12px 30px rgba(52,211,153,0.14);
+}
+
+.calendar-day.paid .payer-badge{
+  border-color: rgba(52,211,153,0.35);
+  background: rgba(52,211,153,0.14);
+}
+
+/* Responsivo */
+@media (max-width: 768px){
+  #leaderboard .list-item{ grid-template-columns: 1fr; gap: .65rem; }
+  #leaderboard .score{ justify-self: start; }
+  .calendar-day{ min-height: 72px; padding: .6rem; border-radius: 14px; }
+  .day-number{ font-size: 1rem; }
+}

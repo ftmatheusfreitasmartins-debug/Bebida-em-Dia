@@ -1,0 +1,309 @@
+/* ============================================================================
+   HEADER v2 (Glass + Pills) — Bebida em Dia
+   Colar no final do public/css/styles.css (ou em um header-v2.css)
+============================================================================ */
+
+/* Header: glassmorphism + sticky */
+.app-header{
+  background: rgba(16, 23, 42, 0.62);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.35);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  padding: 0.9rem 1.25rem;
+  min-height: 78px;
+
+  /* melhora alinhamento em telas grandes */
+  gap: 1rem;
+}
+
+/* Linha “brilho” no topo */
+.app-header::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:2px;
+  background: linear-gradient(90deg,
+    transparent,
+    rgba(59,130,246,0.7),
+    rgba(52,211,153,0.55),
+    transparent
+  );
+  opacity: .55;
+  pointer-events:none;
+}
+
+/* Logo: mais “marca” */
+.header-logo{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  padding:.55rem .85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.05);
+  transition: var(--transition);
+}
+
+.header-logo:hover{
+  transform: translateY(-1px);
+  border-color: rgba(59,130,246,0.35);
+  box-shadow: 0 10px 26px rgba(59,130,246,0.18);
+  background: rgba(59,130,246,0.08);
+}
+
+.logo-icon{
+  font-size: 1.75rem;
+  filter: drop-shadow(0 0 10px rgba(59,130,246,0.35));
+}
+
+.logo-text{
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+
+/* NAV: pill container central */
+.nav-menu{
+  flex: 1;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap: .5rem;
+
+  padding: .35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.12);
+}
+
+/* Itens: pill */
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:.65rem;
+
+  padding: .70rem 1rem;
+  border-radius: 999px;
+  background: transparent;
+  border: 1px solid transparent;
+
+  transition: var(--transition-fast);
+  color: rgba(255,255,255,0.78);
+  position: relative;
+}
+
+/* Ícone com leve “punch” */
+.nav-item i{
+  font-size: 1.05rem;
+  opacity: .95;
+}
+
+/* Hover */
+.nav-item:hover{
+  background: rgba(59,130,246,0.10);
+  border-color: rgba(59,130,246,0.20);
+  transform: translateY(-1px);
+  color: var(--text-primary);
+}
+
+/* Active: pill destacado */
+.nav-item.active{
+  background: linear-gradient(135deg,
+    rgba(59,130,246,0.25),
+    rgba(59,130,246,0.10)
+  );
+  border-color: rgba(59,130,246,0.35);
+  color: var(--text-primary);
+  box-shadow: 0 10px 26px rgba(59,130,246,0.18);
+}
+
+/* Dot/underline sutil no active */
+.nav-item.active::after{
+  content:"";
+  position:absolute;
+  left: 16px;
+  right: 16px;
+  bottom: -6px;
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(59,130,246,0.9), rgba(96,165,250,0.2));
+  opacity:.85;
+}
+
+/* Dropdown: seta e menu refinado */
+.nav-item.dropdown{
+  padding-right: 1.05rem;
+}
+
+.nav-item.dropdown > span{
+  display:inline-flex;
+  align-items:center;
+  gap:.45rem;
+}
+
+/* Menu */
+.dropdown-menu{
+  top: calc(100% + .85rem);
+  background: rgba(30, 42, 60, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+  overflow: hidden;
+
+  min-width: 240px;
+}
+
+/* setinha do dropdown */
+.dropdown-menu::before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 16px;
+  height: 16px;
+  background: rgba(30, 42, 60, 0.78);
+  border-left: 1px solid rgba(255,255,255,0.12);
+  border-top: 1px solid rgba(255,255,255,0.12);
+}
+
+/* Items do dropdown */
+.dropdown-item{
+  padding: .95rem 1.1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  background: transparent;
+  transition: var(--transition-fast);
+}
+
+.dropdown-item:last-child{
+  border-bottom: none;
+}
+
+.dropdown-item i{
+  width: 22px;
+  text-align:center;
+  opacity: .95;
+}
+
+.dropdown-item:hover{
+  background: linear-gradient(135deg, rgba(59,130,246,0.18), rgba(0,0,0,0.10));
+  color: var(--text-primary);
+  padding-left: 1.35rem;
+}
+
+/* Perfil: vira um chip mais limpo */
+.header-profile{
+  padding: .55rem .85rem;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 10px 26px rgba(0,0,0,0.18);
+  gap: .75rem;
+}
+
+.header-profile:hover{
+  border-color: rgba(59,130,246,0.30);
+  background: rgba(59,130,246,0.08);
+}
+
+/* Avatar */
+.profile-avatar{
+  width: 44px;
+  height: 44px;
+  border-width: 2px;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.18);
+}
+
+.profile-info h3{
+  font-size: .98rem;
+}
+
+.profile-info p{
+  font-size: .78rem;
+}
+
+/* Logout: botão quadrado premium */
+.logout-btn{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  background: rgba(248,113,113,0.10);
+  border: 1px solid rgba(248,113,113,0.25);
+}
+
+.logout-btn:hover{
+  background: linear-gradient(135deg, rgba(248,113,113,0.85), rgba(239,68,68,0.55));
+  border-color: rgba(248,113,113,0.55);
+  transform: translateY(-1px) rotate(-8deg);
+  box-shadow: 0 14px 28px rgba(248,113,113,0.22);
+}
+
+/* Botão mobile */
+.menu-toggle{
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.menu-toggle:hover{
+  border-color: rgba(59,130,246,0.30);
+  background: rgba(59,130,246,0.10);
+}
+
+/* Responsivo: esconde texto do nav primeiro */
+@media (max-width: 1024px){
+  .nav-item span{ display:none; }
+  .nav-item{ padding: .70rem; min-width: 46px; justify-content:center; }
+  .nav-menu{ gap: .35rem; }
+}
+
+/* Responsivo: nav vira drawer (usa seu JS atual que toggle .nav-menu.active) */
+@media (max-width: 768px){
+  .nav-menu{
+    display:none;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    width: 320px;
+    padding: 1.25rem;
+    border-radius: 0;
+    background: rgba(16,23,42,0.92);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 24px 70px rgba(0,0,0,0.55);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: .75rem;
+  }
+
+  .nav-menu.active{
+    display:flex;
+    left:0;
+  }
+
+  .nav-item span{ display:inline; }
+  .nav-item{ justify-content:flex-start; padding: 1rem 1rem; }
+
+  .dropdown-menu{
+    position: static;
+    transform: none;
+    opacity: 1;
+    visibility: visible;
+    box-shadow: none;
+    margin-top: .35rem;
+  }
+
+  .dropdown-menu::before{ display:none; }
+}

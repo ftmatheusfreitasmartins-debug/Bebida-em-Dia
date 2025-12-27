@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="description" content="Sistema de gerenciamento de rodízio de bebidas - Bebida em Dia" />
+  <meta name="keywords" content="bebida, rodízio, pagamento, gestão, controle" />
+  <meta name="author" content="Bebida em Dia Team" />
+
+  <title>Bebida em Dia</title>
+
+  <link rel="icon" type="image/x-icon" href="assets/coca-logo.png" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/user-ui.css" />
+  <link rel="stylesheet" href="css/header-v2.css" />
+  <link rel="stylesheet" href="css/sections-v3.css" />
+
+  <meta name="theme-color" content="#3B82F6" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+</head>
+
+<body data-theme="dark">
+  <div class="app-container">
+    <!-- HEADER (mantido para o JS e navegação) -->
+    <header class="app-header">
+      <div class="header-logo">
+        <i class="fas fa-mug-hot logo-icon"></i>
+        <span class="logo-text">Bebida em Dia</span>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-item active">
+          <i class="fas fa-home"></i>
+          <span>Usuários</span>
+        </div>
+
+        <div class="nav-item dropdown">
+          <i class="fas fa-ellipsis-h"></i>
+          <span>Mais</span>
+
+          <div class="dropdown-menu">
+            <div class="dropdown-item" id="openSettingsModal" role="button" aria-label="Abrir configurações">
+              <i class="fas fa-cog"></i>
+              Configurações
+            </div>
+
+            <div class="dropdown-item" id="openHelpModal" role="button" aria-label="Abrir ajuda">
+              <i class="fas fa-question-circle"></i>
+              Ajuda
+            </div>
+
+            <a class="dropdown-item" href="admin.html" aria-label="Abrir painel administrativo">
+              <i class="fas fa-user-shield"></i>
+              Admin
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="header-profile">
+        <div class="profile-avatar" id="profileAvatar">
+          <i class="fas fa-user-circle"></i>
+        </div>
+
+        <div class="profile-info">
+          <h3 id="personName">Visitante</h3>
+          <p id="profileStatus">Status Pendente</p>
+        </div>
+
+        <button class="logout-btn" id="logoutBtn" aria-label="Sair do perfil">
+          <i class="fas fa-sign-out-alt"></i>
+        </button>
+      </div>
+
+      <button class="menu-toggle" aria-label="Abrir menu">
+        <i class="fas fa-bars"></i>
+      </button>
+    </header>
+
+    <main class="main-content">
+      <!-- =========================
+           NOVA HOME (USUÁRIOS)
+           ========================= -->
+      <section class="uDash" aria-label="Painel do usuário">
+        <div class="uDash__bg"></div>
+
+        <div class="uDash__top">
+          <div class="uDash__title">
+            <div class="uDash__badge">
+              <i class="fas fa-bolt"></i>
+              Painel
+            </div>
+            <h1>Registrar bebida, acompanhar status e consultar histórico</h1>
+            <p>
+              Use o botão principal para registrar a bebida do dia e navegue pelos atalhos abaixo.
+            </p>
+          </div>
+
+          <div class="uDash__actions">
+            <!-- BOTÃO PRINCIPAL (IDs do JS) -->
+            <button class="uDash__primaryBtn" id="togglePaidBtn" disabled aria-label="Registrar bebida do dia">
+              <span class="uDash__primaryIcon"><i class="fas fa-mug-hot"></i></span>
+              <span class="uDash__primaryText">
+                <span class="uDash__primaryLabel">Registrar bebida</span>
+                <span class="uDash__primaryHint" id="toggleButtonText">Selecione um perfil para continuar</span>
+              </span>
+              <span class="uDash__primaryChevron"><i class="fas fa-chevron-right"></i></span>
+            </button>
+
+            <div class="uDash__secondaryRow">
+              <button class="uDash__chip" type="button" onclick="Modal.open('selectPersonModal')" aria-label="Trocar perfil">
+                <i class="fas fa-user"></i>
+                Trocar perfil
+              </button>
+
+              <button class="uDash__chip" type="button" onclick="document.getElementById('openSettingsModal')?.click()" aria-label="Abrir configurações">
+                <i class="fas fa-cog"></i>
+                Configurações
+              </button>
+
+              <button class="uDash__chip" type="button" onclick="document.getElementById('openHelpModal')?.click()" aria-label="Abrir ajuda">
+                <i class="fas fa-question-circle"></i>
+                Ajuda
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="uDash__grid">
+          <!-- Cards principais (IDs do JS: não duplicar) -->
+          <div class="uCard uCard--accent">
+            <div class="uCard__icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="uCard__body">
+              <div class="uCard__value" id="dayOfTheYear">...</div>
+              <div class="uCard__label">Dia do ano</div>
+            </div>
+          </div>
+
+          <div class="uCard">
+            <div class="uCard__icon"><i class="fas fa-mug-hot"></i></div>
+            <div class="uCard__body">
+              <div class="uCard__value" id="paidPeopleCount">...</div>
+              <div class="uCard__label">Bebidas hoje</div>
+            </div>
+          </div>
+
+          <div class="uCard uCard--success">
+            <div class="uCard__icon"><i class="fas fa-user-clock"></i></div>
+            <div class="uCard__body">
+              <div class="uCard__value" id="nextPersonName">...</div>
+              <div class="uCard__label">Próxima pessoa</div>
+            </div>
+          </div>
+
+          <!-- Atalhos -->
+          <button class="uShortcut" type="button" onclick="document.getElementById('rankingPanel')?.scrollIntoView({behavior:'smooth'})">
+            <span class="uShortcut__icon"><i class="fas fa-trophy"></i></span>
+            <span class="uShortcut__text">
+              <span class="uShortcut__title">Ranking</span>
+              <span class="uShortcut__desc">Quem pagou mais</span>
+            </span>
+            <i class="fas fa-arrow-right uShortcut__arrow"></i>
+          </button>
+
+          <button class="uShortcut" type="button" onclick="document.getElementById('historyPanel')?.scrollIntoView({behavior:'smooth'})">
+            <span class="uShortcut__icon"><i class="fas fa-history"></i></span>
+            <span class="uShortcut__text">
+              <span class="uShortcut__title">Histórico</span>
+              <span class="uShortcut__desc">Pessoal e geral</span>
+            </span>
+            <i class="fas fa-arrow-right uShortcut__arrow"></i>
+          </button>
+
+          <button class="uShortcut" type="button" onclick="document.getElementById('calendarPanel')?.scrollIntoView({behavior:'smooth'})">
+            <span class="uShortcut__icon"><i class="fas fa-calendar-alt"></i></span>
+            <span class="uShortcut__text">
+              <span class="uShortcut__title">Calendário</span>
+              <span class="uShortcut__desc">Pagamentos do mês</span>
+            </span>
+            <i class="fas fa-arrow-right uShortcut__arrow"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- =========================
+           SEÇÕES (reestilizadas via CSS)
+           ========================= -->
+
+      <!-- Ranking -->
+      <section class="panel uPanel" id="rankingPanel">
+        <div class="panel-header uPanel__header">
+          <h2 class="panel-title">Ranking de Bebidas</h2>
+          <div class="uPanel__hint">
+            <i class="fas fa-trophy"></i>
+            Top contribuintes
+          </div>
+        </div>
+
+        <ul class="list uList" id="leaderboard">
+          <li class="list-item">
+            <div class="loading-spinner">
+              <div class="spinner"></div>
+              <span>Carregando ranking...</span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <!-- Histórico -->
+      <section class="panel uPanel" id="historyPanel">
+        <div class="panel-header uPanel__header">
+          <h2 class="panel-title">Histórico de Bebidas</h2>
+
+          <div class="history-toggle uHistoryToggle" id="historyToggle">
+            <span>Ver Histórico Pessoal</span>
+            <i class="fas fa-chevron-down"></i>
+          </div>
+        </div>
+
+        <div class="history-content uHistoryContent" id="historyContent">
+          <ul class="list uList" id="paidHistory">
+            <li class="list-item">
+              <span>Selecione um perfil para ver o histórico</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Calendário -->
+      <section class="panel uPanel" id="calendarPanel">
+        <div class="panel-header uPanel__header">
+          <h2 class="panel-title">Calendário de Bebidas</h2>
+
+          <div class="uCalendarTop">
+            <button class="btn small-btn" id="prevMonthBtn" aria-label="Mês anterior">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+
+            <h2 id="monthYear" class="uMonthTitle">Carregando...</h2>
+
+            <button class="btn small-btn" id="nextMonthBtn" aria-label="Próximo mês">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="calendar-grid uCalendarGrid" id="calendarGrid">
+          <div class="loading-spinner">
+            <div class="spinner"></div>
+            <span>Carregando calendário...</span>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- =========================
+         MODAIS (mantidos)
+         ========================= -->
+
+    <div class="modal-backdrop hidden" id="selectPersonModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Selecione seu Perfil</h2>
+          <button class="close-btn" id="closePersonModal" aria-label="Fechar modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <p class="modal-desc">Escolha seu perfil para começar.</p>
+
+          <div id="personSelectModalList">
+            <div class="loading-spinner">
+              <div class="spinner"></div>
+              <span>Carregando perfis...</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="settingsModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Configurações</h2>
+          <button class="close-btn" id="closeSettingsModal" aria-label="Fechar modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <p class="modal-desc">Personalize sua experiência.</p>
+
+          <label for="themeSelector">Tema da Interface</label>
+          <select id="themeSelector" class="form-input">
+            <option value="">Carregando temas...</option>
+          </select>
+
+          <label for="backgroundInput">Imagem de Fundo (URL)</label>
+          <input type="url" id="backgroundInput" class="form-input" placeholder="https://exemplo.com/imagem.jpg" />
+
+          <div class="actions-group">
+            <button class="btn" id="applyBackgroundBtn" aria-label="Aplicar imagem de fundo">
+              <i class="fas fa-image"></i> Aplicar Fundo
+            </button>
+            <button class="btn btn-outline" id="clearBackgroundBtn" aria-label="Limpar imagem de fundo">
+              <i class="fas fa-times"></i> Limpar Fundo
+            </button>
+          </div>
+
+          <label for="profileImageInput">Foto de Perfil (URL)</label>
+          <input type="url" id="profileImageInput" class="form-input" placeholder="https://exemplo.com/avatar.jpg" />
+
+          <div class="actions-group">
+            <button class="btn" id="applyProfileImageBtn" aria-label="Aplicar foto de perfil">
+              <i class="fas fa-user"></i> Aplicar Foto
+            </button>
+            <button class="btn btn-outline" id="clearProfileImageBtn" aria-label="Limpar foto de perfil">
+              <i class="fas fa-user-times"></i> Limpar Foto
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="helpModal">
+      <div class="modal">
+        <div class="modal-header">
+          <h2 class="modal-title">Ajuda</h2>
+          <button class="close-btn" id="closeHelpModal" aria-label="Fechar modal">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <div class="modal-content">
+          <div class="alert-content alert-info">
+            <i class="fas fa-info-circle alert-icon"></i>
+            <div>
+              <h3>Como usar</h3>
+              <p>Selecione o perfil, registre a bebida e acompanhe ranking/histórico/calendário.</p>
+            </div>
+          </div>
+
+          <div class="actions-group">
+            <button class="btn" id="closeHelpModalBtn" aria-label="Fechar ajuda">
+              <i class="fas fa-check"></i> Entendi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>&copy; 2025 Bebida em Dia. Sistema de gerenciamento da coca.</p>
+      <p>Desenvolvido por Matheus Martins</p>
+    </footer>
+  </div>
+
+  <!-- Scripts do app -->
+  <script src="js/utils.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

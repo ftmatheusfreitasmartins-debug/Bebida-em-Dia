@@ -1,0 +1,349 @@
+/* ============================================================================
+   MENU INICIAL (HOME DASH V2) - Bebida em Dia
+   Arquivo: public/css/home-v2.css
+============================================================================ */
+
+.homeDash {
+  position: relative;
+  margin: 0 0 2rem 0;
+  border-radius: calc(var(--border-radius-lg) + 0.25rem);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(16, 23, 42, 0.95), rgba(30, 42, 60, 0.92));
+  box-shadow: var(--shadow-xl);
+}
+
+.homeDash__bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(900px 450px at 12% 8%, rgba(59, 130, 246, 0.28), transparent 60%),
+    radial-gradient(900px 450px at 90% 0%, rgba(52, 211, 153, 0.18), transparent 55%),
+    radial-gradient(700px 480px at 70% 95%, rgba(251, 191, 36, 0.10), transparent 55%);
+  opacity: 0.95;
+  pointer-events: none;
+}
+
+.homeDash__grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1.35fr 0.85fr;
+  gap: 1.25rem;
+  padding: 1.75rem;
+}
+
+.homeDash__kicker {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.homeDash__pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.10);
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.homeDash__adminLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  transition: var(--transition-fast);
+}
+
+.homeDash__adminLink:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.10);
+  transform: translateY(-1px);
+  color: var(--text-primary);
+}
+
+.homeDash__title {
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(1.75rem, 2.5vw, 2.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.75rem;
+}
+
+.homeDash__subtitle {
+  color: var(--text-secondary);
+  max-width: 70ch;
+  margin-bottom: 1.25rem;
+}
+
+.homeDash__cta {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.homeDash__primaryBtn {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 52px 1fr 44px;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 1rem 1.05rem;
+  border-radius: calc(var(--border-radius-lg) + 0.2rem);
+  box-shadow: 0 14px 34px rgba(59, 130, 246, 0.20);
+  transform: translateZ(0);
+}
+
+.homeDash__primaryBtnIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.homeDash__primaryBtnText {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+}
+
+.homeDash__primaryBtnLabel {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.homeDash__primaryBtnHint {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.85);
+  opacity: 0.95;
+}
+
+.homeDash__primaryBtnArrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+.homeDash__primaryBtn:hover .homeDash__primaryBtnArrow {
+  transform: translateX(2px);
+}
+
+.homeDash__quick {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.homeDash__quickBtn {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: var(--text-secondary);
+  border-radius: calc(var(--border-radius) + 0.15rem);
+  padding: 0.85rem 0.9rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 48px;
+  font-weight: 700;
+}
+
+.homeDash__quickBtn:hover {
+  border-color: rgba(59, 130, 246, 0.45);
+  background: rgba(59, 130, 246, 0.10);
+  color: var(--text-primary);
+  transform: translateY(-2px);
+}
+
+.homeDash__shortcuts {
+  margin-top: 1.15rem;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+
+.homeDash__shortcut {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.12);
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  padding: 1rem 1rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
+}
+
+.homeDash__shortcut:hover {
+  transform: translateY(-3px);
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.22);
+  background: rgba(59, 130, 246, 0.08);
+}
+
+.homeDash__shortcutIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: var(--accent-primary);
+}
+
+.homeDash__shortcutTitle {
+  font-family: "Poppins", sans-serif;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.homeDash__shortcutDesc {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 0.15rem;
+}
+
+.homeDash__shortcutArrow {
+  margin-left: auto;
+  color: rgba(255,255,255,0.45);
+}
+
+.homeDash__side {
+  display: grid;
+  gap: 0.9rem;
+  align-content: start;
+}
+
+.homeDash__profileCard {
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.12);
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  padding: 1rem;
+}
+
+.homeDash__profileTop {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.homeDash__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: var(--text-primary);
+}
+
+.homeDash__profileName {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+}
+
+.homeDash__profileStatus {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-top: 0.1rem;
+}
+
+.homeDash__profileHint {
+  margin-top: 0.85rem;
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  padding-top: 0.85rem;
+}
+
+.homeDash__stats {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.homeDash__statCard {
+  display: flex;
+  gap: 0.85rem;
+  align-items: center;
+  padding: 1rem;
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.12);
+}
+
+.homeDash__statCard--accent {
+  border-color: rgba(52, 211, 153, 0.28);
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.10), rgba(0,0,0,0.10));
+}
+
+.homeDash__statIcon {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  background: rgba(59, 130, 246, 0.12);
+  border: 1px solid rgba(59, 130, 246, 0.22);
+  color: var(--accent-primary);
+}
+
+.homeDash__statValue {
+  font-family: "Poppins", sans-serif;
+  font-weight: 900;
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
+.homeDash__statLabel {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.homeDash__note {
+  border: 1px dashed rgba(59, 130, 246, 0.35);
+  background: rgba(59, 130, 246, 0.06);
+  border-radius: calc(var(--border-radius-lg) + 0.1rem);
+  padding: 0.9rem 1rem;
+  color: var(--text-secondary);
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 1024px) {
+  .homeDash__grid { grid-template-columns: 1fr; }
+  .homeDash__shortcuts { grid-template-columns: 1fr; }
+  .homeDash__quick { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 480px) {
+  .homeDash__grid { padding: 1.1rem; }
+  .homeDash__primaryBtn { grid-template-columns: 48px 1fr 40px; padding: 0.95rem; }
+  .homeDash__primaryBtnIcon { width: 48px; height: 48px; border-radius: 14px; }
+  .homeDash__primaryBtnArrow { width: 40px; height: 40px; border-radius: 12px; }
+}

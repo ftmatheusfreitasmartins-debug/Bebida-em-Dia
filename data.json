@@ -1,0 +1,58 @@
+{
+  "chat": [
+    {
+      "id": "1724456546759",
+      "text": "Sistema funcionando perfeitamente!",
+      "timestamp": "2025-08-23T23:22:26.759Z",
+      "userName": "Matheus"
+    },
+    {
+      "id": "1724458189952",
+      "text": "Adorei a nova interface!",
+      "timestamp": "2025-08-23T23:49:49.952Z",
+      "userName": "Ana Beatriz"
+    },
+    {
+      "id": "1724458231902",
+      "text": "Muito mais fácil de usar agora",
+      "timestamp": "2025-08-23T23:50:31.902Z",
+      "userName": "Maria Carolina"
+    },
+    {
+      "id": "1724467231744",
+      "text": "Parabéns pela melhoria! 🎉",
+      "timestamp": "2025-08-24T02:00:31.744Z",
+      "userName": "Lais Dias"
+    }
+  ],
+  "paidDates": {
+    "2025-08-19": "Ana Beatriz",
+    "2025-08-21": "Matheus",
+    "2025-08-23": "Lais Dias",
+    "2025-08-25": "Ana Beatriz",
+    "2025-08-31": "Matheus",
+    "2025-09-06": "Ana Beatriz",
+    "2025-09-08": "Matheus",
+    "2025-09-14": "Maria Carolina",
+    "2025-09-24": "Matheus",
+    "2025-09-30": "Lais Dias",
+    "2025-10-08": "Maria Carolina",
+    "2025-10-16": "Lais Dias",
+    "2025-10-18": "Maria Carolina",
+    "2025-10-26": "Lais Dias",
+    "2025-11-01": "Lais Dias",
+    "2025-11-03": "Lais Dias",
+    "2025-11-05": "Maria Carolina",
+    "2025-11-07": "Matheus"
+  },
+  "people": [
+    "Matheus",
+    "Ana Beatriz",
+    "Maria Carolina",
+    "Lais Dias"
+  ],
+  "settings": {
+    "currentIndex": 2,
+    "rotationMode": "sequential"
+  }
+}
