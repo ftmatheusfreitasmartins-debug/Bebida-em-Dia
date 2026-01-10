@@ -4,11 +4,9 @@ const { Client } = require("pg");
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_key";
 
-// tente pegar a env var que o seu Netlify DB criou
 const DATABASE_URL =
   process.env.NETLIFY_DATABASE_URL ||
-  process.env.DATABASE_URL ||
-  process.env.NEON_DATABASE_URL;
+  process.env.NETLIFY_DATABASE_URL_UNPOOLED;
 
 const DEFAULT_STATE = {
   people: ["Matheus", "Ana Beatriz", "Maria Carolina", "Lais Dias"],
@@ -30,8 +28,26 @@ function json(statusCode, body) {
   };
 }
 
+/**
+ * CORREÇÃO PRINCIPAL:
+ * Em alguns cenários o Netlify passa event.path como:
+ * - "/.netlify/functions/api/data"
+ * e em outros (via rewrite) pode chegar como:
+ * - "/api/data"
+ * Então a API precisa aceitar os dois.
+ */
 function getPath(event) {
-  return (event.path || "").replace(/^\/.netlify\/functions\/api/, "") || "/";
+  const p = event.path || "/";
+
+  if (p.startsWith("/.netlify/functions/api")) {
+    return p.replace("/.netlify/functions/api", "") || "/";
+  }
+
+  if (p.startsWith("/api")) {
+    return p.replace("/api", "") || "/";
+  }
+
+  return p;
 }
 
 function parseBody(event) {
@@ -54,16 +70,19 @@ function requireAdmin(event) {
   const token = getAuthToken(event);
   if (!token) return { ok: false, error: "Token de acesso necessário." };
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    return { ok: true, decoded };
+    jwt.verify(token, JWT_SECRET);
+    return { ok: true };
   } catch {
     return { ok: false, error: "Token inválido." };
   }
 }
 
 async function withDb(fn) {
-  if (!DATABASE_URL) throw new Error("DATABASE_URL não configurada no ambiente.");
-  const client = new Client({ connectionString: DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  if (!DATABASE_URL) throw new Error("NETLIFY_DATABASE_URL não configurada.");
+  const client = new Client({
+    connectionString: DATABASE_URL,
+    ssl: { rejectUnauthorized: false },
+  });
   await client.connect();
   try {
     return await fn(client);
@@ -74,31 +93,39 @@ async function withDb(fn) {
 
 async function getState(client) {
   const { rows } = await client.query("select data from app_state where id = 1");
+
   if (!rows.length) {
-    await client.query("insert into app_state (id, data) values (1, $1::jsonb)", [
-      JSON.stringify(DEFAULT_STATE),
-    ]);
+    await client.query(
+      "insert into app_state (id, data) values (1, $1::jsonb)",
+      [JSON.stringify(DEFAULT_STATE)]
+    );
     return { ...DEFAULT_STATE };
   }
+
   return rows[0].data || { ...DEFAULT_STATE };
 }
 
 async function saveState(client, state) {
-  await client.query("update app_state set data = $1::jsonb where id = 1", [JSON.stringify(state)]);
+  await client.query("update app_state set data = $1::jsonb where id = 1", [
+    JSON.stringify(state),
+  ]);
 }
 
 function getNextPersonInRotation(people, settings) {
   if (!people || people.length === 0) return null;
+
   if (settings?.rotationMode === "random") {
     return people[Math.floor(Math.random() * people.length)];
   }
+
   const idx = settings?.currentIndex || 0;
   return people[idx % people.length];
 }
 
 function updateRotationIndex(state) {
   if (state?.settings?.rotationMode === "sequential") {
-    state.settings.currentIndex = (state.settings.currentIndex + 1) % state.people.length;
+    state.settings.currentIndex =
+      (state.settings.currentIndex + 1) % state.people.length;
   }
 }
 
@@ -109,19 +136,25 @@ exports.handler = async (event) => {
   const method = event.httpMethod;
 
   try {
-    // públicas
+    // ----------- Públicas -----------
     if (path === "/data" && method === "GET") {
       return await withDb(async (client) => {
         const state = await getState(client);
-        return json(200, { people: state.people, paidDates: state.paidDates, chat: state.chat });
+        return json(200, {
+          people: state.people,
+          paidDates: state.paidDates,
+          chat: state.chat,
+        });
       });
     }
 
     if (path === "/next-person" && method === "GET") {
       return await withDb(async (client) => {
         const state = await getState(client);
-        const nextPerson = getNextPersonInRotation(state.people, state.settings);
-        return json(200, { success: true, nextPerson });
+        return json(200, {
+          success: true,
+          nextPerson: getNextPersonInRotation(state.people, state.settings),
+        });
       });
     }
 
@@ -155,7 +188,10 @@ exports.handler = async (event) => {
       const text = String(body.text || "").trim();
 
       if (!userName || !text) {
-        return json(400, { success: false, error: "Nome de usuário e texto são obrigatórios." });
+        return json(400, {
+          success: false,
+          error: "Nome de usuário e texto são obrigatórios.",
+        });
       }
       if (text.length > 500) {
         return json(400, { success: false, error: "Mensagem muito longa." });
@@ -163,7 +199,8 @@ exports.handler = async (event) => {
 
       return await withDb(async (client) => {
         const state = await getState(client);
-        const newChatMsg = {
+
+        const msg = {
           id: Date.now().toString(),
           userName,
           text,
@@ -171,7 +208,7 @@ exports.handler = async (event) => {
         };
 
         state.chat = Array.isArray(state.chat) ? state.chat : [];
-        state.chat.push(newChatMsg);
+        state.chat.push(msg);
         if (state.chat.length > 100) state.chat = state.chat.slice(-100);
 
         await saveState(client, state);
@@ -179,16 +216,20 @@ exports.handler = async (event) => {
       });
     }
 
-    // admin
+    // ----------- Admin -----------
     if (path === "/admin/login" && method === "POST") {
       const body = parseBody(event);
       const password = String(body.password || "").trim();
+
       if (!password) return json(400, { success: false, error: "Senha é obrigatória." });
       if (password !== ADMIN_PASSWORD) return json(401, { success: false, error: "Senha incorreta." });
 
-      const token = jwt.sign({ role: "admin", timestamp: Date.now() }, JWT_SECRET, {
-        expiresIn: "24h",
-      });
+      const token = jwt.sign(
+        { role: "admin", timestamp: Date.now() },
+        JWT_SECRET,
+        { expiresIn: "24h" }
+      );
+
       return json(200, { success: true, token });
     }
 
@@ -198,10 +239,7 @@ exports.handler = async (event) => {
     }
 
     if (path === "/admin/data" && method === "GET") {
-      return await withDb(async (client) => {
-        const state = await getState(client);
-        return json(200, state);
-      });
+      return await withDb(async (client) => json(200, await getState(client)));
     }
 
     if (path === "/admin/people" && method === "POST") {
@@ -213,7 +251,9 @@ exports.handler = async (event) => {
 
       return await withDb(async (client) => {
         const state = await getState(client);
-        if (state.people.includes(name)) return json(400, { success: false, error: "Pessoa já existe." });
+        if (state.people.includes(name)) {
+          return json(400, { success: false, error: "Pessoa já existe." });
+        }
 
         state.people.push(name);
         await saveState(client, state);
@@ -228,17 +268,22 @@ exports.handler = async (event) => {
 
       return await withDb(async (client) => {
         const state = await getState(client);
+
         const before = state.people.length;
         state.people = state.people.filter((p) => p !== name);
-        if (state.people.length === before) return json(404, { success: false, error: "Pessoa não encontrada." });
+        if (state.people.length === before) {
+          return json(404, { success: false, error: "Pessoa não encontrada." });
+        }
 
         const newPaidDates = {};
-        for (const date in state.paidDates) {
-          if (state.paidDates[date] !== name) newPaidDates[date] = state.paidDates[date];
+        for (const d in state.paidDates) {
+          if (state.paidDates[d] !== name) newPaidDates[d] = state.paidDates[d];
         }
         state.paidDates = newPaidDates;
 
-        if ((state.settings?.currentIndex || 0) >= state.people.length) state.settings.currentIndex = 0;
+        if ((state.settings?.currentIndex || 0) >= state.people.length) {
+          state.settings.currentIndex = 0;
+        }
 
         await saveState(client, state);
         return json(200, { success: true, people: state.people, paidDates: state.paidDates });
@@ -251,12 +296,17 @@ exports.handler = async (event) => {
       const name = body.name === null ? null : String(body.name || "").trim();
 
       if (!date) return json(400, { success: false, error: "Data é obrigatória." });
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return json(400, { success: false, error: "Formato de data inválido." });
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+        return json(400, { success: false, error: "Formato de data inválido." });
+      }
 
       return await withDb(async (client) => {
         const state = await getState(client);
+
         if (name) {
-          if (!state.people.includes(name)) return json(400, { success: false, error: "Pessoa não encontrada." });
+          if (!state.people.includes(name)) {
+            return json(400, { success: false, error: "Pessoa não encontrada." });
+          }
           state.paidDates[date] = name;
         } else {
           delete state.paidDates[date];
@@ -271,7 +321,7 @@ exports.handler = async (event) => {
       return await withDb(async (client) => {
         const state = await getState(client);
         state.paidDates = {};
-        if (!state.settings) state.settings = { rotationMode: "sequential", currentIndex: 0 };
+        state.settings = state.settings || { rotationMode: "sequential", currentIndex: 0 };
         state.settings.currentIndex = 0;
 
         await saveState(client, state);
@@ -289,7 +339,7 @@ exports.handler = async (event) => {
 
       return await withDb(async (client) => {
         const state = await getState(client);
-        if (!state.settings) state.settings = { rotationMode: "sequential", currentIndex: 0 };
+        state.settings = state.settings || { rotationMode: "sequential", currentIndex: 0 };
         state.settings.rotationMode = rotationMode;
 
         await saveState(client, state);
@@ -299,6 +349,10 @@ exports.handler = async (event) => {
 
     return json(404, { success: false, error: "Rota não encontrada." });
   } catch (e) {
-    return json(500, { success: false, error: "Erro interno do servidor.", details: String(e?.message || e) });
+    return json(500, {
+      success: false,
+      error: "Erro interno do servidor.",
+      details: String(e?.message || e),
+    });
   }
 };
