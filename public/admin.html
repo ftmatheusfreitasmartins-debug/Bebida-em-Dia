@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Admin - Bebida em Dia</title>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/admin-styles.css" />
+  </head>
+
+  <body data-theme="dark">
+    <div class="app-container">
+      <!-- Modal de Login -->
+      <div class="modal-backdrop" id="loginModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">
+              <i class="fas fa-shield-alt"></i>
+              Acesso Administrativo
+            </h2>
+          </div>
+
+          <div class="modal-content">
+            <div class="alert-content alert-warning">
+              <i class="fas fa-exclamation-triangle alert-icon"></i>
+              <p>Esta área é restrita a administradores. Digite a senha para continuar.</p>
+            </div>
+
+            <div id="errorMsg" class="text-danger mb-2"></div>
+
+            <label for="adminPassword">Senha de Administrador</label>
+            <input
+              type="password"
+              id="adminPassword"
+              class="form-input"
+              placeholder="Digite a senha"
+            />
+
+            <div class="actions-group">
+              <button class="btn full-width" id="loginBtn" type="button">
+                <i class="fas fa-right-to-bracket"></i>
+                Entrar
+              </button>
+
+              <a href="/" class="btn btn-outline full-width">
+                <i class="fas fa-arrow-left"></i>
+                Voltar ao Site
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conteúdo Administrativo -->
+      <div class="admin-content hidden" id="adminContent">
+        <!-- Navegação Admin -->
+        <nav class="admin-nav">
+          <div class="header-logo" role="button" onclick="location.href='/'" title="Voltar ao site">
+            <i class="fas fa-shield-alt logo-icon"></i>
+            <span class="logo-text">Painel Admin</span>
+          </div>
+
+          <div class="nav-tabs" role="tablist" aria-label="Navegação do admin">
+            <button class="nav-tab active" data-tab="dashboard" type="button">
+              <i class="fas fa-chart-line"></i>
+              Dashboard
+            </button>
+            <button class="nav-tab" data-tab="people" type="button">
+              <i class="fas fa-users"></i>
+              Pessoas
+            </button>
+            <button class="nav-tab" data-tab="calendar" type="button">
+              <i class="fas fa-calendar-alt"></i>
+              Calendário
+            </button>
+          </div>
+
+          <div class="admin-actions">
+            <button class="btn btn-outline" id="openThemeModal" type="button" title="Tema">
+              <i class="fas fa-palette"></i>
+              Tema
+            </button>
+
+            <button class="btn btn-outline" id="logoutBtn" type="button" title="Sair">
+              <i class="fas fa-right-from-bracket"></i>
+              Sair
+            </button>
+          </div>
+        </nav>
+
+        <main class="main-content">
+          <!-- DASHBOARD -->
+          <section class="panel tab-content" id="dashboardTab">
+            <div class="panel-header">
+              <h2 class="panel-title">Dashboard</h2>
+              <i class="fas fa-chart-line panel-icon"></i>
+            </div>
+
+            <!-- Estatísticas -->
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-value" id="totalPayments">0</div>
+                <div class="stat-label">Total de bebidas</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value" id="totalPeople">0</div>
+                <div class="stat-label">Pessoas cadastradas</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value" id="lastPaymentDate">N/A</div>
+                <div class="stat-label">Último pagamento</div>
+              </div>
+
+              <div class="stat-card">
+                <div class="stat-value" id="currentMonth">0</div>
+                <div class="stat-label">Bebidas este mês</div>
+              </div>
+            </div>
+
+            <div class="admin-grid-2">
+              <!-- Gráfico (HTML) -->
+              <div class="panel-sub">
+                <div class="panel-sub-header">
+                  <h3>Distribuição (Top)</h3>
+                  <small>Baseado no histórico total</small>
+                </div>
+                <div class="chart-container" id="paymentsChart"></div>
+              </div>
+
+              <!-- Ranking -->
+              <div class="panel-sub">
+                <div class="panel-sub-header">
+                  <h3>Ranking</h3>
+                  <small>Quem mais registrou</small>
+                </div>
+                <ul class="list" id="adminRankingList">
+                  <li class="list-item">
+                    <span class="person">Carregando...</span>
+                    <span class="score">...</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <!-- Atividade recente + Config -->
+            <div class="admin-grid-2">
+              <div class="panel-sub">
+                <div class="panel-sub-header">
+                  <h3>Atividade recente</h3>
+                  <small>Últimos registros</small>
+                </div>
+                <ul class="admin-activity" id="adminActivityList">
+                  <li class="admin-activity-item">Carregando...</li>
+                </ul>
+              </div>
+
+              <div class="panel-sub">
+                <div class="panel-sub-header">
+                  <h3>Configurações</h3>
+                  <small>Rotação e manutenção</small>
+                </div>
+
+                <div class="admin-settings">
+                  <div class="admin-field">
+                    <label for="rotationModeSelect">Modo de rotação</label>
+                    <select id="rotationModeSelect" class="form-select">
+                      <option value="sequential">Sequencial</option>
+                      <option value="random">Aleatório</option>
+                    </select>
+                  </div>
+
+                  <div class="actions-group">
+                    <button class="btn" id="saveRotationBtn" type="button">
+                      <i class="fas fa-floppy-disk"></i>
+                      Salvar rotação
+                    </button>
+
+                    <button class="btn danger" id="resetHistoryBtn" type="button">
+                      <i class="fas fa-trash"></i>
+                      Resetar histórico
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- PESSOAS -->
+          <section class="panel tab-content hidden" id="peopleTab">
+            <div class="panel-header">
+              <h2 class="panel-title">Pessoas</h2>
+              <i class="fas fa-users panel-icon"></i>
+            </div>
+
+            <div class="alert-content alert-info">
+              <i class="fas fa-circle-info alert-icon"></i>
+              <p>Busque, ordene e use ações rápidas (histórico / marcar hoje / copiar / remover).</p>
+            </div>
+
+            <div class="admin-toolbar">
+              <div class="toolbar-left">
+                <div class="admin-search">
+                  <i class="fas fa-magnifying-glass"></i>
+                  <input
+                    type="text"
+                    id="peopleSearchInput"
+                    class="form-input"
+                    placeholder="Buscar pessoa..."
+                    autocomplete="off"
+                  />
+                </div>
+
+                <select class="form-select" id="peopleSortSelect" title="Ordenar">
+                  <option value="az">A → Z</option>
+                  <option value="za">Z → A</option>
+                  <option value="score">Mais bebidas</option>
+                </select>
+
+                <div class="admin-chip" id="peopleCountChip">0 pessoas</div>
+              </div>
+
+              <div class="toolbar-right">
+                <input
+                  type="text"
+                  id="newPersonName"
+                  class="form-input"
+                  placeholder="Nome da nova pessoa"
+                  maxlength="50"
+                />
+                <button class="btn" id="addPersonBtn" type="button">
+                  <i class="fas fa-user-plus"></i>
+                  Adicionar
+                </button>
+              </div>
+            </div>
+
+            <ul class="list admin-people-list" id="peopleList">
+              <li class="list-item">
+                <span class="person">Carregando pessoas...</span>
+              </li>
+            </ul>
+          </section>
+
+          <!-- CALENDÁRIO -->
+          <section class="panel tab-content hidden" id="calendarTab">
+            <div class="panel-header">
+              <h2 class="panel-title">Calendário</h2>
+              <i class="fas fa-calendar-alt panel-icon"></i>
+            </div>
+
+            <div class="admin-toolbar">
+              <div class="toolbar-left">
+                <label class="admin-label" for="calendarPersonFilter">Filtrar por pessoa</label>
+                <select id="calendarPersonFilter" class="form-select">
+                  <option value="">Sem filtro</option>
+                </select>
+
+                <button class="btn btn-outline" id="openPersonHistoryBtn" type="button">
+                  <i class="fas fa-clock-rotate-left"></i>
+                  Histórico
+                </button>
+              </div>
+
+              <div class="toolbar-right">
+                <button class="btn btn-outline" id="goTodayBtn" type="button">
+                  <i class="fas fa-crosshairs"></i>
+                  Ir para mês atual
+                </button>
+              </div>
+            </div>
+
+            <div class="calendar-nav calendar-nav-premium">
+              <button class="btn small-btn ghost" id="prevMonthBtn" aria-label="Mês anterior">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+
+              <div class="calendar-title">
+                <h2 id="monthYear">Carregando...</h2>
+                <small>Edite clicando no dia</small>
+              </div>
+
+              <button class="btn small-btn ghost" id="nextMonthBtn" aria-label="Próximo mês">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+            </div>
+
+            <div class="calendar-grid" id="calendarGrid">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Carregando calendário...</span>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <!-- Modal de Pagamento -->
+      <div class="modal-backdrop hidden" id="paymentModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title" id="paymentModalTitle">Pagamento</h2>
+            <button class="close-btn" id="closePaymentModalBtn" aria-label="Fechar">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-content">
+            <div class="payment-meta">
+              <div class="payment-meta-row">
+                <span class="payment-meta-label">Pago por:</span>
+                <span class="payment-meta-value" id="paymentCurrentPayer">—</span>
+              </div>
+            </div>
+
+            <div class="admin-search">
+              <i class="fas fa-magnifying-glass"></i>
+              <input
+                type="text"
+                id="paymentSearchInput"
+                class="form-input"
+                placeholder="Buscar pessoa..."
+                autocomplete="off"
+              />
+            </div>
+
+            <div id="paymentPeopleList" class="payment-people-list">
+              <div class="loading-spinner">
+                <div class="spinner"></div>
+                <span>Carregando opções...</span>
+              </div>
+            </div>
+
+            <div class="actions-group">
+              <button class="btn danger full-width" id="clearPaymentBtn" type="button">
+                <i class="fas fa-eraser"></i>
+                Remover pagamento do dia
+              </button>
+
+              <button class="btn btn-outline full-width" id="closePaymentModalBtn2" type="button">
+                <i class="fas fa-xmark"></i>
+                Fechar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Histórico por Pessoa -->
+      <div class="modal-backdrop hidden" id="personHistoryModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">
+              <i class="fas fa-clock-rotate-left"></i>
+              Histórico por pessoa
+            </h2>
+            <button class="close-btn" id="closePersonHistoryModalBtn" aria-label="Fechar">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-content">
+            <label for="personHistorySelect">Pessoa</label>
+            <select id="personHistorySelect" class="form-select"></select>
+
+            <div class="person-history-stats" id="personHistoryStats"></div>
+
+            <ul class="list person-history-list" id="personHistoryList">
+              <li class="list-item"><span>Selecione uma pessoa</span></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal de Tema -->
+      <div class="modal-backdrop hidden" id="themeModal">
+        <div class="modal">
+          <div class="modal-header">
+            <h2 class="modal-title">Temas</h2>
+            <button class="close-btn" id="closeThemeModal" aria-label="Fechar temas">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="modal-content">
+            <p class="modal-desc">Escolha um tema para a interface (fica salvo no navegador).</p>
+            <div id="themeOptions"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scripts -->
+      <script src="js/utils.js"></script>
+      <script src="js/api.js"></script>
+      <script src="js/theme.js"></script>
+      <script src="js/modal.js"></script>
+      <script src="js/admin.js"></script>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,54 @@
+{
+  "people": [
+    "Matheus",
+    "Ana Beatriz",
+    "Maria Carolina",
+    "Lais Dias"
+  ],
+  "paidDates": {
+    "2025-08-19": "Ana Beatriz",
+    "2025-08-21": "Matheus",
+    "2025-08-23": "Lais Dias",
+    "2025-08-25": "Ana Beatriz",
+    "2025-08-31": "Matheus",
+    "2025-09-06": "Ana Beatriz",
+    "2025-09-08": "Matheus",
+    "2025-09-14": "Maria Carolina",
+    "2025-09-24": "Matheus",
+    "2025-09-30": "Lais Dias",
+    "2025-10-08": "Maria Carolina",
+    "2025-10-18": "Maria Carolina",
+    "2025-10-16": "Lais Dias",
+    "2025-10-26": "Lais Dias"
+  },
+  "chat": [
+    {
+      "id": "1724456546759",
+      "userName": "Matheus",
+      "text": "Sistema funcionando perfeitamente!",
+      "timestamp": "2025-08-23T23:22:26.759Z"
+    },
+    {
+      "id": "1724458189952",
+      "userName": "Ana Beatriz",
+      "text": "Adorei a nova interface!",
+      "timestamp": "2025-08-23T23:49:49.952Z"
+    },
+    {
+      "id": "1724458231902",
+      "userName": "Maria Carolina",
+      "text": "Muito mais fácil de usar agora",
+      "timestamp": "2025-08-23T23:50:31.902Z"
+    },
+    {
+      "id": "1724467231744",
+      "userName": "Lais Dias",
+      "text": "Parabéns pela melhoria! 🎉",
+      "timestamp": "2025-08-24T02:00:31.744Z"
+    }
+  ],
+  "settings": {
+    "rotationMode": "sequential",
+    "currentIndex": 2
+  }
+}
