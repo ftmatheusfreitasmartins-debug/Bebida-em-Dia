@@ -28,25 +28,15 @@ function json(statusCode, body) {
   };
 }
 
-/**
- * CORREÇÃO PRINCIPAL:
- * Em alguns cenários o Netlify passa event.path como:
- * - "/.netlify/functions/api/data"
- * e em outros (via rewrite) pode chegar como:
- * - "/api/data"
- * Então a API precisa aceitar os dois.
- */
 function getPath(event) {
   const p = event.path || "/";
 
   if (p.startsWith("/.netlify/functions/api")) {
     return p.replace("/.netlify/functions/api", "") || "/";
   }
-
   if (p.startsWith("/api")) {
     return p.replace("/api", "") || "/";
   }
-
   return p;
 }
 
@@ -91,13 +81,32 @@ async function withDb(fn) {
   }
 }
 
+async function ensureSchema(client) {
+  // Cria tabela se não existir (para bancos novos)
+  await client.query(`
+    create table if not exists app_state (
+      id text primary key,
+      data jsonb not null
+    );
+  `);
+}
+
 async function getState(client) {
-  const { rows } = await client.query("select data from app_state where id = 1");
+  await ensureSchema(client);
+
+  // CORREÇÃO: se sua coluna id for TEXT, comparar com inteiro quebra.
+  // Aqui sempre usamos id como string.
+  const STATE_ID = "1";
+
+  const { rows } = await client.query(
+    "select data from app_state where id = $1",
+    [STATE_ID]
+  );
 
   if (!rows.length) {
     await client.query(
-      "insert into app_state (id, data) values (1, $1::jsonb)",
-      [JSON.stringify(DEFAULT_STATE)]
+      "insert into app_state (id, data) values ($1, $2::jsonb)",
+      [STATE_ID, JSON.stringify(DEFAULT_STATE)]
     );
     return { ...DEFAULT_STATE };
   }
@@ -106,9 +115,11 @@ async function getState(client) {
 }
 
 async function saveState(client, state) {
-  await client.query("update app_state set data = $1::jsonb where id = 1", [
-    JSON.stringify(state),
-  ]);
+  const STATE_ID = "1";
+  await client.query(
+    "update app_state set data = $1::jsonb where id = $2",
+    [JSON.stringify(state), STATE_ID]
+  );
 }
 
 function getNextPersonInRotation(people, settings) {
