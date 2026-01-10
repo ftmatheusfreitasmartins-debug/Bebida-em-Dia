@@ -243,7 +243,12 @@ renderThemeOptions() {
     this.updateTodayChip();
     this.renderRanking();
 
-    Utils.showToast(`Perfil ${name} selecionado!`, "success");
+  Utils.showToast(`Logado como ${name}`, "success", {
+  title: "Sessão",
+  duration: 2500,
+  id: "session-status",
+  replace: true
+});
   }
 
   updateTodayChip() {
